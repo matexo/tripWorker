@@ -14,10 +14,10 @@ public class QueueTest {
     public static String azureServiceName = "img-to-resize";
 
     public static void main(String[] args) throws URISyntaxException, StorageException, IOException {
-        AzureConfig queueConfig = new AzureConfig(accountName , accountKey , "img-to-resize");
-        AzureConfig containerConfig = new AzureConfig(accountName , accountKey , "img-to-resize");
+        AzureConfig queueConfig = new AzureConfig(accountName , accountKey , azureServiceName);
+        AzureConfig containerConfig = new AzureConfig(accountName , accountKey , azureServiceName);
         ResizeQueue resizeQueue = new ResizeQueue(queueConfig , containerConfig);
-//        resizeQueue.queue.addMessageToQueue("fifa17.jpg");
+        resizeQueue.queue.addMessageToQueue("fifa17.jpg");
         resizeQueue.run();
     }
 }

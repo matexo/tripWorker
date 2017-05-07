@@ -19,7 +19,8 @@ public class ResizeQueue extends QueueBody implements Runnable {
     public void run() {
     while(true) {
         Long lenghtOfQueue = queue.getLength();
-        if(lenghtOfQueue > 0) {
+        if(lenghtOfQueue > 0) { //w przypadku gdy pobierzemy wiadomosc jest ona blokowana na okres czasu podany w kolejce
+            // pobranie dlugosci kolejki w takim wypadku pokazuje niezerowe ale nie jest pobierana nowa wiadomosc
             CloudQueueMessage cloudQueueMessage = queue.getNextMessage();
             if(cloudQueueMessage != null) {
                 String message = queue.getMessageAsString(cloudQueueMessage);
