@@ -3,6 +3,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlob;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
+import config.AzureConfig;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,23 +13,15 @@ import java.io.ByteArrayOutputStream;
      */
     public class Container {
 
-        public static final String accountName = "tripcontainer";
-        public static final String accountKey = "beUQum99z5wuiahalcLEesKHwmzNxvP75QNjbSVakxclvqKFuQuNYB0d9SciriyG1RV9Die3wJ+a/lY9KADIhA==";
-        public static final String storageConnectionName =
-                "DefaultEndpointsProtocol=http;"
-                        + "AccountName=" + accountName +";"
-                        + "AccountKey=" + accountKey;
-
-
         private CloudStorageAccount cloudStorageAccount;
         private CloudBlobClient cloudBlobClient;
         private CloudBlobContainer cloudBlobContainer;
 
-        public Container(String blobName) {
+        public Container(AzureConfig containerConfig) {
             try {
-                cloudStorageAccount = CloudStorageAccount.parse(storageConnectionName);
+                cloudStorageAccount = CloudStorageAccount.parse(containerConfig.getConfig());
                 cloudBlobClient = cloudStorageAccount.createCloudBlobClient();
-                cloudBlobContainer = cloudBlobClient.getContainerReference(blobName);
+                cloudBlobContainer = cloudBlobClient.getContainerReference(containerConfig.getAzureServiceName());
             } catch (Exception e) {
                 System.out.println(e.getMessage()); //dac logi czy cos
             }

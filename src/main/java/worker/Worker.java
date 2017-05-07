@@ -1,5 +1,6 @@
 package worker;
 
+import config.AzureConfig;
 import container.Container;
 
 /**
@@ -8,4 +9,6 @@ import container.Container;
 public class Worker {
 
     public Container container;
+
+    public Worker(AzureConfig azureConfig) { container = new Container(azureConfig);}
 }

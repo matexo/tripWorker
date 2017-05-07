@@ -1,5 +1,6 @@
 package worker;
 
+import config.AzureConfig;
 import container.Container;
 import org.imgscalr.Scalr;
 
@@ -15,8 +16,8 @@ public class ResizeWorker extends Worker implements IWorker{
     private static final Integer THUMBNAIL_Y_SIZE = 100;
     private static final String DEFAULT_FORMAT = "jpg";
 
-    public ResizeWorker(String blobName) {
-        container = new Container(blobName);
+    public ResizeWorker(AzureConfig azureConfig) {
+        super(azureConfig);
     }
 
     //Przyjmuje nazwe pliku do pobrania ewentualnie url w tym przypadku trzeba sparsowac
