@@ -28,13 +28,11 @@ public class ContainerTest {
 
         PresentationDTO presentationDTO = new PresentationDTO(123 , "https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg" , 100 , 200);
         json = gson.toJson(presentationDTO);
+        System.out.println(json);
 
         AzureConfig containerConfig = new AzureConfig(accountName , accountKey , azureServiceName);
         IWorker worker = new ResizeWorker(containerConfig);
         worker.doWork(json);
-
-
-
 
     }
 }

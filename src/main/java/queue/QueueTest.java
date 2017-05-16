@@ -9,15 +9,15 @@ import java.net.URISyntaxException;
  * Created by Matexo on 2017-05-07.
  */
 public class QueueTest {
-    public static String accountName = "tripcontainer";
-    public static String accountKey = "beUQum99z5wuiahalcLEesKHwmzNxvP75QNjbSVakxclvqKFuQuNYB0d9SciriyG1RV9Die3wJ+a/lY9KADIhA==";
-    public static String azureServiceName = "img-to-resize";
+    public static String accountName = "tripappdisks435";
+    public static String accountKey = "1nXbjOtmxm1sX3z6sPVGpDOUCfrrMTJpQ6NWc59VbyzmATdbrFUWE5uXMbk6DTJ9GUmH36590thxOKWxoXLNkA==";
+    public static String queueServiceName = "thumbnailgen";
+    public static String containerServiceName = "trip-media";
 
     public static void main(String[] args) throws URISyntaxException, StorageException, IOException {
-        AzureConfig queueConfig = new AzureConfig(accountName , accountKey , azureServiceName);
-        AzureConfig containerConfig = new AzureConfig(accountName , accountKey , azureServiceName);
+        AzureConfig queueConfig = new AzureConfig(accountName , accountKey , queueServiceName);
+        AzureConfig containerConfig = new AzureConfig(accountName , accountKey , containerServiceName);
         ResizeQueue resizeQueue = new ResizeQueue(queueConfig , containerConfig);
-        resizeQueue.queue.addMessageToQueue("fifa17.jpg");
         resizeQueue.run();
     }
 }
