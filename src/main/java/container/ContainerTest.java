@@ -1,7 +1,12 @@
 package container;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.microsoft.azure.storage.StorageException;
 import config.AzureConfig;
+import model.PresentationDTO;
+import model.Progress;
+import model.ProgressDTO;
 import worker.IWorker;
 import worker.ResizeWorker;
 import java.io.IOException;
@@ -16,8 +21,20 @@ public class ContainerTest {
     public static String azureServiceName = "img-to-resize";
 
     public static void main(String[] args) throws URISyntaxException, StorageException, IOException {
-        AzureConfig containerConfig = new AzureConfig(accountName , accountKey , "img-to-resize");
+        Gson gson = new GsonBuilder().create();
+        ProgressDTO progressDTO = new ProgressDTO(10 , Progress.WORKING , 123);
+        String json = gson.toJson(progressDTO);
+        System.out.println(json);
+
+        PresentationDTO presentationDTO = new PresentationDTO(123 , "https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg" , 100 , 200);
+        json = gson.toJson(presentationDTO);
+
+        AzureConfig containerConfig = new AzureConfig(accountName , accountKey , azureServiceName);
         IWorker worker = new ResizeWorker(containerConfig);
-        worker.doWork("fifa17.jpg");
+        worker.doWork(json);
+
+
+
+
     }
 }

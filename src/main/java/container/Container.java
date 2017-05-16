@@ -27,27 +27,18 @@ import java.io.ByteArrayOutputStream;
             }
         }
 
-        public ByteArrayOutputStream downloadBlobItem(String blobItemName) {
+        public ByteArrayOutputStream downloadBlobItem(String blobItemName) throws Exception {
             ByteArrayOutputStream outputStream = null;
-            try {
             CloudBlob blob = cloudBlobContainer.getBlockBlobReference(blobItemName);
             outputStream = new ByteArrayOutputStream();
             blob.download(outputStream);
-            } catch (Exception e) {
-                System.out.println(e.getMessage()); //dac logi czy cos
-            }
             return outputStream;
         }
 
-        public void uploadBlobItem(String blobItemName , ByteArrayOutputStream itemStream) {
-            try {
-                CloudBlob blob = cloudBlobContainer.getBlockBlobReference(blobItemName);
-                byte[] bytes = itemStream.toByteArray();
-                blob.upload(new ByteArrayInputStream(bytes) , bytes.length);
-            } catch (Exception e) {
-                System.out.println(e.getMessage()); //dac logi czy cos
-            }
-
+        public void uploadBlobItem(String blobItemName , ByteArrayOutputStream itemStream) throws Exception {
+            CloudBlob blob = cloudBlobContainer.getBlockBlobReference(blobItemName);
+            byte[] bytes = itemStream.toByteArray();
+            blob.upload(new ByteArrayInputStream(bytes) , bytes.length);
         }
 
 

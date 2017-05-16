@@ -78,10 +78,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                 if (packet.isComplete())
                     muxer.write(packet, false);
             } while (packet.isComplete());
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
