@@ -2,13 +2,7 @@ package tripApp.queue;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import tripApp.config.AzureConfig;
 import tripApp.config.StaticConfig;
-import tripApp.model.PresentationDTO;
-import tripApp.model.Progress;
-import tripApp.model.ProgressDTO;
-import tripApp.worker.IWorker;
-import tripApp.worker.thumbnail.ResizeWorker;
 
 /**
  * Created by Matexo on 2017-05-18.

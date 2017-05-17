@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import tripApp.config.AzureConfig;
 import tripApp.model.PresentationDTO;
-import tripApp.model.Progress;
+import tripApp.model.Status;
 import tripApp.model.ProgressDTO;
 import tripApp.worker.IWorker;
 import tripApp.worker.thumbnail.ResizeWorker;
@@ -19,7 +19,7 @@ public class ContainerTest {
 
     public static void main(String[] args) throws Exception {
         Gson gson = new GsonBuilder().create();
-        ProgressDTO progressDTO = new ProgressDTO(10, Progress.WORKING, "123");
+        ProgressDTO progressDTO = new ProgressDTO(10, Status.WORKING, "123");
         String json = gson.toJson(progressDTO);
         System.out.println(json);
 

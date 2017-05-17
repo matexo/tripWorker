@@ -4,40 +4,40 @@ package tripApp.model;
  * Created by Matexo on 2017-05-16.
  */
 public class ProgressDTO {
-    private Integer percentStatus;
-    private Progress progress;
+    private Integer progress;
+    private Status status;
     //long czy int
     private String correlationID;
     private String progressInfo;
     private String content;
 
-    public ProgressDTO(Integer percentStatus, Progress progress, String correlationID) {
-        this.percentStatus = percentStatus;
+    public ProgressDTO(Integer progress, Status status, String correlationID) {
         this.progress = progress;
+        this.status = status;
         this.correlationID = correlationID;
     }
 
-    public ProgressDTO(Integer percentStatus, Progress progress, String correlationID, String progressInfo) {
-        this.percentStatus = percentStatus;
+    public ProgressDTO(Integer progress, Status status, String correlationID, String progressInfo) {
         this.progress = progress;
+        this.status = status;
         this.correlationID = correlationID;
         this.progressInfo = progressInfo;
     }
 
-    public Integer getPercentStatus() {
-        return percentStatus;
-    }
-
-    public void setPercentStatus(Integer percentStatus) {
-        this.percentStatus = percentStatus;
-    }
-
-    public Progress getProgress() {
+    public Integer getProgress() {
         return progress;
     }
 
-    public void setProgress(Progress progress) {
+    public void setProgress(Integer progress) {
         this.progress = progress;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public String getCorrelationID() {
