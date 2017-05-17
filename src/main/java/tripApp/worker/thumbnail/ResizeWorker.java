@@ -113,9 +113,9 @@ public class ResizeWorker extends Worker implements IWorker {
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(100, Progress.SUCCESS, presentationDTO.getCorrelationID())));
-
-        progressQueue.addMessageToQueue(gson.toJson(new PresentationDTO(presentationDTO.getCorrelationID(), HARDCODED_BASE_URL + thumbnailName, null, null)));
+        ProgressDTO progressDTO = new ProgressDTO(100, Progress.COMPLETED, presentationDTO.getCorrelationID());
+        progressDTO.setContent(HARDCODED_BASE_URL + thumbnailName);
+        progressQueue.addMessageToQueue(gson.toJson(progressDTO));
 
         return thumbnailName;
     }

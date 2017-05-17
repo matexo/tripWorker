@@ -9,6 +9,7 @@ public class ProgressDTO {
     //long czy int
     private String correlationID;
     private String progressInfo;
+    private String content;
 
     public ProgressDTO(Integer percentStatus, Progress progress, String correlationID) {
         this.percentStatus = percentStatus;
@@ -53,5 +54,13 @@ public class ProgressDTO {
 
     public void setProgressInfo(String progressInfo) {
         this.progressInfo = progressInfo;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 }
