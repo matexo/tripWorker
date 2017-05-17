@@ -7,16 +7,16 @@ public class ProgressDTO {
     private Integer percentStatus;
     private Progress progress;
     //long czy int
-    private Integer correlationID;
+    private String correlationID;
     private String progressInfo;
 
-    public ProgressDTO(Integer percentStatus, Progress progress, Integer correlationID) {
+    public ProgressDTO(Integer percentStatus, Progress progress, String correlationID) {
         this.percentStatus = percentStatus;
         this.progress = progress;
         this.correlationID = correlationID;
     }
 
-    public ProgressDTO(Integer percentStatus, Progress progress, Integer correlationID, String progressInfo) {
+    public ProgressDTO(Integer percentStatus, Progress progress, String correlationID, String progressInfo) {
         this.percentStatus = percentStatus;
         this.progress = progress;
         this.correlationID = correlationID;
@@ -39,11 +39,11 @@ public class ProgressDTO {
         this.progress = progress;
     }
 
-    public Integer getCorrelationID() {
+    public String getCorrelationID() {
         return correlationID;
     }
 
-    public void setCorrelationID(Integer correlationID) {
+    public void setCorrelationID(String correlationID) {
         this.correlationID = correlationID;
     }
 

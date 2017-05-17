@@ -4,25 +4,25 @@ package tripApp.model;
  * Created by Matexo on 2017-05-16.
  */
 public class PresentationDTO {
-    private Integer correlationID;
+    private String correlationID;
     private String fileUrl;
     private Integer sizeX;
     private Integer sizeY;
     private String fileName;
     private String fileFormat;
 
-    public PresentationDTO(Integer correlationID, String fileUrl, Integer sizeX, Integer sizeY) {
+    public PresentationDTO(String correlationID, String fileUrl, Integer sizeX, Integer sizeY) {
         this.correlationID = correlationID;
         this.fileUrl = fileUrl;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
 
-    public Integer getCorrelationID() {
+    public String getCorrelationID() {
         return correlationID;
     }
 
-    public void setCorrelationID(Integer correlationID) {
+    public void setCorrelationID(String correlationID) {
         this.correlationID = correlationID;
     }
 

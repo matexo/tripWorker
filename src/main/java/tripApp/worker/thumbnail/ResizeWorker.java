@@ -25,11 +25,14 @@ import java.util.List;
  */
 public class ResizeWorker extends Worker implements IWorker {
 
-    private static final Integer THUMBNAIL_Y_SIZE = 100;
+    private static final Integer THUMBNAIL_Y_SIZE = 200;
     private static final String DEFAULT_FORMAT = "jpg";
     private static final String ADDITIONAL_FILE_NAME = "thumbnail.";
 
-    private final List<String> acceptableFormat = Arrays.asList("jpg", "png"); // z kropka czy bez?
+    private final List<String> acceptableFormat = Arrays.asList("jpg", "png" , "jpeg"); // z kropka czy bez?
+
+    //bardzo brzydka szpachla
+    private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
 
 
     public ResizeWorker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
@@ -51,25 +54,25 @@ public class ResizeWorker extends Worker implements IWorker {
 
         presentationDTO = parseUrl(presentationDTO);
         if (!validateFileInfo(presentationDTO)) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(10, Progress.ERROR, presentationDTO.getCorrelationID())));
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Progress.ERROR, presentationDTO.getCorrelationID())));
             System.out.println(ErrorMessage.URL_PARSING_ERROR + " " + presentationDTO.getFileUrl());
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(10, Progress.WORKING, presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Progress.WORKING, presentationDTO.getCorrelationID())));
 
         // pobierz obrazek z bloba
         ByteArrayOutputStream downloadedBlobItem;
         try {
             downloadedBlobItem = container.downloadBlobItem(presentationDTO.getFileName() + "." + presentationDTO.getFileFormat());
         } catch (Exception e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Progress.ERROR, presentationDTO.getCorrelationID())));
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Progress.ERROR, presentationDTO.getCorrelationID())));
             System.out.println(ErrorMessage.DOWNLOADING_ERROR + " " + presentationDTO.getFileName() + presentationDTO.getFileFormat());
             return null;
         }
 
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Progress.WORKING, presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Progress.WORKING, presentationDTO.getCorrelationID())));
 
 
         if (downloadedBlobItem == null)
@@ -80,12 +83,12 @@ public class ResizeWorker extends Worker implements IWorker {
         try {
             bufferedImage = Scalr.resize(ImageIO.read(new ByteArrayInputStream(downloadedBlobItem.toByteArray())), THUMBNAIL_Y_SIZE);
         } catch (IOException e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(30, Progress.ERROR, presentationDTO.getCorrelationID())));
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(60, Progress.ERROR, presentationDTO.getCorrelationID())));
             System.out.println(ErrorMessage.RESIZING_ERROR + " " + THUMBNAIL_Y_SIZE);
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(30, Progress.WORKING, presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(60, Progress.WORKING, presentationDTO.getCorrelationID())));
 
 
         // wrzuc obrazek do bloba
@@ -94,25 +97,25 @@ public class ResizeWorker extends Worker implements IWorker {
         try {
             ImageIO.write(bufferedImage, DEFAULT_FORMAT, byteArrayOutputStream);
         } catch (IOException e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Progress.ERROR, presentationDTO.getCorrelationID())));
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Progress.ERROR, presentationDTO.getCorrelationID())));
             System.out.println(ErrorMessage.WRITING_ERROR);
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Progress.WORKING, presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Progress.WORKING, presentationDTO.getCorrelationID())));
 
 
         try {
             container.uploadBlobItem(thumbnailName, byteArrayOutputStream);
         } catch (Exception e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(75, Progress.ERROR, presentationDTO.getCorrelationID())));
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(90, Progress.ERROR, presentationDTO.getCorrelationID())));
             System.out.println(ErrorMessage.UPLOADING_ERROR);
             return null;
         }
 
         progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(100, Progress.SUCCESS, presentationDTO.getCorrelationID())));
 
-        progressQueue.addMessageToQueue(gson.toJson(new PresentationDTO(presentationDTO.getCorrelationID(), "https://tripcontainer.blob.core.windows.net/img-to-resize/" + thumbnailName, null, null)));
+        progressQueue.addMessageToQueue(gson.toJson(new PresentationDTO(presentationDTO.getCorrelationID(), HARDCODED_BASE_URL + thumbnailName, null, null)));
 
         return thumbnailName;
     }

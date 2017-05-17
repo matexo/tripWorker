@@ -4,6 +4,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import org.apache.log4j.Logger;
 import tripApp.config.AzureConfig;
+import tripApp.model.ErrorMessage;
 import tripApp.worker.thumbnail.ResizeWorker;
 
 import java.net.URISyntaxException;
@@ -35,8 +36,11 @@ public class ResizeQueue extends QueueBody implements Runnable {
                     if (cloudQueueMessage != null) {
                         String message = queue.getMessageAsString(cloudQueueMessage);
                         if (message != null && message.length() > 0) {
-                            worker.doWork(message);
-                            queue.deleteMessageAfterProcess(cloudQueueMessage);
+                            String result = worker.doWork(message);
+                            if(result!= null) {
+                                queue.deleteMessageAfterProcess(cloudQueueMessage);
+                            } else
+                                System.out.println("Error on" + message);
                         }
                     }
                 } else {

@@ -19,11 +19,11 @@ public class ContainerTest {
 
     public static void main(String[] args) throws Exception {
         Gson gson = new GsonBuilder().create();
-        ProgressDTO progressDTO = new ProgressDTO(10, Progress.WORKING, 123);
+        ProgressDTO progressDTO = new ProgressDTO(10, Progress.WORKING, "123");
         String json = gson.toJson(progressDTO);
         System.out.println(json);
 
-        PresentationDTO presentationDTO = new PresentationDTO(123, "https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg", 100, 200);
+        PresentationDTO presentationDTO = new PresentationDTO("123", "https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg", 100, 200);
         json = gson.toJson(presentationDTO);
         System.out.println(json);
 
