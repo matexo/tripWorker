@@ -1,22 +1,27 @@
-package worker;
+package tripApp.worker.presentation;
 
-import config.AzureConfig;
+import com.microsoft.azure.storage.StorageException;
+import tripApp.config.AzureConfig;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import org.imgscalr.Scalr;
+import tripApp.worker.IWorker;
+import tripApp.worker.Worker;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 
 /**
  * Created by mr on 5/8/17.
  */
 public class VideoFromImagesWorker extends Worker implements IWorker {
-    public VideoFromImagesWorker(AzureConfig azureConfig) {
+    public VideoFromImagesWorker(AzureConfig azureConfig)
+            throws InvalidKeyException, StorageException, URISyntaxException {
         super(azureConfig);
     }
 

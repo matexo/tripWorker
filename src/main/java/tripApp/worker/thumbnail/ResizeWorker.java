@@ -1,16 +1,22 @@
-package worker;
+package tripApp.worker.thumbnail;
 
-import config.AzureConfig;
-import model.ErrorMessage;
-import model.PresentationDTO;
-import model.Progress;
-import model.ProgressDTO;
+import com.microsoft.azure.storage.StorageException;
 import org.imgscalr.Scalr;
+import tripApp.config.AzureConfig;
+import tripApp.model.ErrorMessage;
+import tripApp.model.PresentationDTO;
+import tripApp.model.Progress;
+import tripApp.model.ProgressDTO;
+import tripApp.worker.IWorker;
+import tripApp.worker.Worker;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,12 +32,12 @@ public class ResizeWorker extends Worker implements IWorker {
     private final List<String> acceptableFormat = Arrays.asList("jpg", "png"); // z kropka czy bez?
 
 
-    public ResizeWorker(AzureConfig azureConfig) {
+    public ResizeWorker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
         super(azureConfig);
     }
 
     //Przyjmuje nazwe pliku do pobrania ewentualnie url w tym przypadku trzeba sparsowac
-    public String doWork(String message) {
+    public String doWork(String message) throws StorageException {
 
         PresentationDTO presentationDTO = gson.fromJson(message, PresentationDTO.class);
 
@@ -70,7 +76,7 @@ public class ResizeWorker extends Worker implements IWorker {
             return null; //cos jeszcze??
 
         // przetworz obrazek (co sie bedzie dzialo jak nie znajdzie)
-        BufferedImage bufferedImage = null;
+        BufferedImage bufferedImage;
         try {
             bufferedImage = Scalr.resize(ImageIO.read(new ByteArrayInputStream(downloadedBlobItem.toByteArray())), THUMBNAIL_Y_SIZE);
         } catch (IOException e) {
@@ -104,9 +110,9 @@ public class ResizeWorker extends Worker implements IWorker {
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(100 , Progress.SUCCESS , presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(100, Progress.SUCCESS, presentationDTO.getCorrelationID())));
 
-        progressQueue.addMessageToQueue(gson.toJson(new PresentationDTO(presentationDTO.getCorrelationID() , "https://tripcontainer.blob.core.windows.net/img-to-resize/" + thumbnailName , null , null)));
+        progressQueue.addMessageToQueue(gson.toJson(new PresentationDTO(presentationDTO.getCorrelationID(), "https://tripcontainer.blob.core.windows.net/img-to-resize/" + thumbnailName, null, null)));
 
         return thumbnailName;
     }
@@ -123,7 +129,7 @@ public class ResizeWorker extends Worker implements IWorker {
         // https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg
         //szpachla
         String[] urlElem = url.split("/");
-        String tmp[] = urlElem[urlElem.length-1].split("\\.");
+        String tmp[] = urlElem[urlElem.length - 1].split("\\.");
         String fileName = tmp[0];
         String fileFormat = tmp[1];
         //szpachla

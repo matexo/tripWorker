@@ -1,9 +1,6 @@
-package queue;
+package tripApp.queue;
 
-import com.microsoft.azure.storage.StorageException;
-import config.AzureConfig;
-import java.io.IOException;
-import java.net.URISyntaxException;
+import tripApp.config.AzureConfig;
 
 /**
  * Created by Matexo on 2017-05-07.
@@ -14,7 +11,7 @@ public class QueueTest {
     public static String queueServiceName = "thumbnailgen";
     public static String containerServiceName = "trip-media";
 
-    public static void main(String[] args) throws URISyntaxException, StorageException, IOException {
+    public static void main(String[] args) throws Exception {
         AzureConfig queueConfig = new AzureConfig(accountName , accountKey , queueServiceName);
         AzureConfig containerConfig = new AzureConfig(accountName , accountKey , containerServiceName);
         ResizeQueue resizeQueue = new ResizeQueue(queueConfig , containerConfig);

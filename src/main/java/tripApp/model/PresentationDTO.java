@@ -1,4 +1,4 @@
-package model;
+package tripApp.model;
 
 /**
  * Created by Matexo on 2017-05-16.
@@ -8,7 +8,6 @@ public class PresentationDTO {
     private String fileUrl;
     private Integer sizeX;
     private Integer sizeY;
-
     private String fileName;
     private String fileFormat;
 

@@ -1,8 +1,11 @@
-package queue;
+package tripApp.queue;
 
-import com.google.gson.Gson;
-import config.AzureConfig;
-import worker.IWorker;
+import com.microsoft.azure.storage.StorageException;
+import tripApp.config.AzureConfig;
+import tripApp.worker.IWorker;
+
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 
 /**
  * Created by Matexo on 2017-05-07.
@@ -14,14 +17,13 @@ public class QueueBody {
     private static final String progressQueueServiceName = "progressqueue";
     // NIE RUSZAC DLA KAZDEGO WORKERA TAKIE SAME QUEUE
 
-
     public Queue queue;
     public Queue progressQueue;
     public IWorker worker;
-    public Gson gson;
 
-    public  QueueBody(AzureConfig azureConfig) {
+    public QueueBody(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
         this.queue = new Queue(azureConfig);
-        this.progressQueue = new Queue(new AzureConfig(progressQueueAccountName, progressQueueAccountKey , progressQueueServiceName));
+        this.progressQueue = new Queue(new AzureConfig(progressQueueAccountName, progressQueueAccountKey,
+                progressQueueServiceName));
     }
 }
