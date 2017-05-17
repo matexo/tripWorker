@@ -24,6 +24,7 @@ public class Queue {
         cloudStorageAccount = CloudStorageAccount.parse(queueConfig.getConfig());
         cloudQueueClient = cloudStorageAccount.createCloudQueueClient();
         cloudQueue = cloudQueueClient.getQueueReference(queueConfig.getAzureServiceName());
+        cloudQueue.setShouldEncodeMessage(false);
     }
 
     public void addMessageToQueue(String message) throws StorageException {
