@@ -2,6 +2,7 @@ package tripApp.worker;
 
 import com.google.gson.Gson;
 import com.microsoft.azure.storage.StorageException;
+import org.apache.log4j.Logger;
 import tripApp.config.AzureConfig;
 import tripApp.config.StaticConfig;
 import tripApp.container.Container;
@@ -17,6 +18,7 @@ public class Worker {
     public Container container;
     public Queue progressQueue;
     public Gson gson;
+    public static final Logger logger = Logger.getLogger(Worker.class);
 
     public Worker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
         container = new Container(azureConfig);

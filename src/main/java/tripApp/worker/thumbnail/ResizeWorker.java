@@ -4,7 +4,7 @@ import com.microsoft.azure.storage.StorageException;
 import org.imgscalr.Scalr;
 import tripApp.config.AzureConfig;
 import tripApp.model.ErrorMessage;
-import tripApp.model.PresentationDTO;
+import tripApp.model.ThumbnailDTO;
 import tripApp.model.Status;
 import tripApp.model.ProgressDTO;
 import tripApp.worker.IWorker;
@@ -42,38 +42,40 @@ public class ResizeWorker extends Worker implements IWorker {
     //Przyjmuje nazwe pliku do pobrania ewentualnie url w tym przypadku trzeba sparsowac
     public String doWork(String message) throws StorageException {
 
-        PresentationDTO presentationDTO = gson.fromJson(message, PresentationDTO.class);
+        ThumbnailDTO thumbnailDTO = gson.fromJson(message, ThumbnailDTO.class);
 
-        if (!validateMessage(presentationDTO)) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(0, Status.ERROR, presentationDTO.getCorrelationID())));
-            System.out.println(ErrorMessage.VALIDATION_ERROR + " " + presentationDTO.toString());
+        if (!validateMessage(thumbnailDTO)) {
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(0, Status.ERROR, thumbnailDTO.getCorrelationID())));
+            logger.error(ErrorMessage.VALIDATION_ERROR + " " + thumbnailDTO.toString());
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(0, Status.WORKING, presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(0, Status.WORKING, thumbnailDTO.getCorrelationID())));
+        logger.debug("Validating message completed" + thumbnailDTO.toString());
 
-        presentationDTO = parseUrl(presentationDTO);
-        if (!validateFileInfo(presentationDTO)) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Status.ERROR, presentationDTO.getCorrelationID())));
-            System.out.println(ErrorMessage.URL_PARSING_ERROR + " " + presentationDTO.getFileUrl());
+        thumbnailDTO = parseUrl(thumbnailDTO);
+        if (!validateFileInfo(thumbnailDTO)) {
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Status.ERROR, thumbnailDTO.getCorrelationID())));
+            logger.error(ErrorMessage.URL_PARSING_ERROR + " " + thumbnailDTO.getFileUrl());
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Status.WORKING, presentationDTO.getCorrelationID())));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(20, Status.WORKING, thumbnailDTO.getCorrelationID())));
+        logger.debug("Parsing and validating URL compleated" + thumbnailDTO.getCorrelationID());
 
         // pobierz obrazek z bloba
         ByteArrayOutputStream downloadedBlobItem;
         try {
-            downloadedBlobItem = container.downloadBlobItem(presentationDTO.getFileName() + "." + presentationDTO.getFileFormat());
+            downloadedBlobItem = container.downloadBlobItem(thumbnailDTO.getFileName() + "." + thumbnailDTO.getFileFormat());
         } catch (Exception e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Status.ERROR, presentationDTO.getCorrelationID())));
-            System.out.println(ErrorMessage.DOWNLOADING_ERROR + " " + presentationDTO.getFileName() + presentationDTO.getFileFormat());
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Status.ERROR, thumbnailDTO.getCorrelationID())));
+            logger.error(ErrorMessage.DOWNLOADING_ERROR + " " + thumbnailDTO.getFileName() + thumbnailDTO.getFileFormat());
             return null;
         }
 
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Status.WORKING, presentationDTO.getCorrelationID())));
-
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(40, Status.WORKING, thumbnailDTO.getCorrelationID())));
+        logger.debug("Downloading completed"  + thumbnailDTO.getCorrelationID());
 
         if (downloadedBlobItem == null)
             return null; //cos jeszcze??
@@ -83,52 +85,52 @@ public class ResizeWorker extends Worker implements IWorker {
         try {
             bufferedImage = Scalr.resize(ImageIO.read(new ByteArrayInputStream(downloadedBlobItem.toByteArray())), THUMBNAIL_Y_SIZE);
         } catch (IOException e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(60, Status.ERROR, presentationDTO.getCorrelationID())));
-            System.out.println(ErrorMessage.RESIZING_ERROR + " " + THUMBNAIL_Y_SIZE);
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(60, Status.ERROR, thumbnailDTO.getCorrelationID())));
+            logger.error(ErrorMessage.RESIZING_ERROR + " " + THUMBNAIL_Y_SIZE);
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(60, Status.WORKING, presentationDTO.getCorrelationID())));
-
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(60, Status.WORKING, thumbnailDTO.getCorrelationID())));
+        logger.debug("Resizing completed"  + thumbnailDTO.getCorrelationID());
 
         // wrzuc obrazek do bloba
-        String thumbnailName = presentationDTO.getFileName() + ADDITIONAL_FILE_NAME + presentationDTO.getFileFormat();
+        String thumbnailName = thumbnailDTO.getFileName() + ADDITIONAL_FILE_NAME + thumbnailDTO.getFileFormat();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
             ImageIO.write(bufferedImage, DEFAULT_FORMAT, byteArrayOutputStream);
         } catch (IOException e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Status.ERROR, presentationDTO.getCorrelationID())));
-            System.out.println(ErrorMessage.WRITING_ERROR);
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Status.ERROR, thumbnailDTO.getCorrelationID())));
+            logger.error(ErrorMessage.WRITING_ERROR);
             return null;
         }
 
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Status.WORKING, presentationDTO.getCorrelationID())));
-
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Status.WORKING, thumbnailDTO.getCorrelationID())));
+        logger.debug("Uploading completed" + thumbnailDTO.getCorrelationID());
 
         try {
             container.uploadBlobItem(thumbnailName, byteArrayOutputStream);
         } catch (Exception e) {
-            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(90, Status.ERROR, presentationDTO.getCorrelationID())));
-            System.out.println(ErrorMessage.UPLOADING_ERROR);
+            progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(90, Status.ERROR, thumbnailDTO.getCorrelationID())));
+            logger.error(ErrorMessage.UPLOADING_ERROR);
             return null;
         }
 
-        ProgressDTO progressDTO = new ProgressDTO(100, Status.COMPLETED, presentationDTO.getCorrelationID());
+        ProgressDTO progressDTO = new ProgressDTO(100, Status.COMPLETED, thumbnailDTO.getCorrelationID());
         progressDTO.setContent(HARDCODED_BASE_URL + thumbnailName);
         progressQueue.addMessageToQueue(gson.toJson(progressDTO));
+        logger.debug("Processed " + thumbnailDTO.getCorrelationID());
 
         return thumbnailName;
     }
 
-    private boolean validateMessage(PresentationDTO presentationDTO) {
-        return presentationDTO.getCorrelationID() != null
-                && presentationDTO.getFileUrl() != null && presentationDTO.getFileUrl().length() > 0
-//                && presentationDTO.getSizeX() != null && presentationDTO.getSizeY() != null
+    private boolean validateMessage(ThumbnailDTO thumbnailDTO) {
+        return thumbnailDTO.getCorrelationID() != null
+                && thumbnailDTO.getFileUrl() != null && thumbnailDTO.getFileUrl().length() > 0
                 ;
     }
 
-    private PresentationDTO parseUrl(PresentationDTO presentationDTO) {
-        String url = presentationDTO.getFileUrl();
+    private ThumbnailDTO parseUrl(ThumbnailDTO thumbnailDTO) {
+        String url = thumbnailDTO.getFileUrl();
         // https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg
         //szpachla
         String[] urlElem = url.split("/");
@@ -137,17 +139,17 @@ public class ResizeWorker extends Worker implements IWorker {
         String fileFormat = tmp[1];
         //szpachla
         if (validateFormat(fileFormat)) {
-            presentationDTO.setFileName(fileName);
-            presentationDTO.setFileFormat(fileFormat);
+            thumbnailDTO.setFileName(fileName);
+            thumbnailDTO.setFileFormat(fileFormat);
         }
-        return presentationDTO;
+        return thumbnailDTO;
     }
 
     private boolean validateFormat(String format) {
         return acceptableFormat.contains(format.toLowerCase());
     }
 
-    private boolean validateFileInfo(PresentationDTO presentationDTO) {
-        return presentationDTO.getFileName() != null && presentationDTO.getFileFormat() != null;
+    private boolean validateFileInfo(ThumbnailDTO thumbnailDTO) {
+        return thumbnailDTO.getFileName() != null && thumbnailDTO.getFileFormat() != null;
     }
 }

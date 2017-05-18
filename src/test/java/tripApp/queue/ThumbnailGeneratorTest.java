@@ -13,7 +13,7 @@ public class ThumbnailGeneratorTest {
         Gson gson = new GsonBuilder().create();
         Queue generatorQueue = new Queue(StaticConfig.getThumbnailGenQueueAzureConfig());
 //        for(Integer i=1; i<2 ;i++) {
-//            PresentationDTO message = new PresentationDTO(i.toString(), "https://tripappdisks435.blob.core.windows.net/trip-media/Caption-This_"+ i +".jpg", null, null);
+//            ThumbnailDTO message = new ThumbnailDTO(i.toString(), "https://tripappdisks435.blob.core.windows.net/trip-media/Caption-This_"+ i +".jpg", null, null);
 //            String json = gson.toJson(message);
 //            generatorQueue.addMessageToQueue(json);
 //        }

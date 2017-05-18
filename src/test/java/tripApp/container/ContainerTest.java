@@ -3,7 +3,7 @@ package tripApp.container;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import tripApp.config.AzureConfig;
-import tripApp.model.PresentationDTO;
+import tripApp.model.ThumbnailDTO;
 import tripApp.model.Status;
 import tripApp.model.ProgressDTO;
 import tripApp.worker.IWorker;
@@ -23,8 +23,8 @@ public class ContainerTest {
         String json = gson.toJson(progressDTO);
         System.out.println(json);
 
-        PresentationDTO presentationDTO = new PresentationDTO("123", "https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg", 100, 200);
-        json = gson.toJson(presentationDTO);
+        ThumbnailDTO thumbnailDTO = new ThumbnailDTO("123", "https://tripcontainer.blob.core.windows.net/img-to-resize/fifa12.jpg");
+        json = gson.toJson(thumbnailDTO);
         System.out.println(json);
 
         AzureConfig containerConfig = new AzureConfig(accountName, accountKey, azureServiceName);
