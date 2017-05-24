@@ -9,6 +9,29 @@ import java.util.Properties;
  * Created by piotr on 17.05.17.
  */
 public class WorkersConfig {
+    public static final String
+            STORAGE_NAME = "storage.name",
+            STORAGE_ACCESS_KEY_1 = "storage.access.key1",
+            STORAGE_ACCESS_KEY_2 = "storage.access.key2",
+
+            BLOB_NAME = "storage.blobs.container.name",
+            BLOB_URL = "storage.blobs.container.url",
+
+            THUMBNAILS_GEN_QUEUE_NAME = "storage.queues.thumbnails.requests.name",
+            THUMBNAILS_GEN_QUEUE_URL = "storage.queues.thumbnails.requests.url",
+            THUMBNAILS_RESP_QUEUE_NAME = "storage.queues.thumbnails.responses.name",
+            THUMBNAILS_RESP_QUEUE_URL = "storage.queues.thumbnails.responses.url",
+
+            PRESENTATIONS_GEN_QUEUE_NAME = "storage.queues.presentations.requests.name",
+            PRESENTATIONS_GEN_QUEUE_URL = "storage.queues.presentations.requests.url",
+            PRESENTATIONS_RESP_QUEUE_NAME = "storage.queues.presentations.responses.name",
+            PRESENTATIONS_RESP_QUEUE_URL = "storage.queues.presentations.responses.url",
+
+            POSTERS_GEN_QUEUE_NAME = "storage.queues.posters.requests.name",
+            POSTERS_GEN_QUEUE_URL = "storage.queues.posters.requests.url",
+            POSTERS_RESP_QUEUE_NAME = "storage.queues.posters.responses.name",
+            POSTERS_RESP_QUEUE_URL = "storage.queues.posters.responses.url";
+
     private static final Logger LOGGER = Logger.getLogger(WorkersConfig.class);
 
     private final Properties properties;
@@ -18,7 +41,7 @@ public class WorkersConfig {
         try {
             properties.load(getClass().getResourceAsStream("workers.properties"));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -26,7 +49,20 @@ public class WorkersConfig {
         return properties.getProperty(key);
     }
 
-    public String getProperty(String key, String defaultValue) {
-        return properties.getProperty(key, defaultValue);
+    public String getStorageName() {
+        return getProperty(STORAGE_NAME);
     }
+
+    public String getStorageAccessKey1() {
+        return getProperty(STORAGE_ACCESS_KEY_1);
+    }
+
+    public String getBlobName() {
+        return getProperty(BLOB_NAME);
+    }
+
+    public AzureConfig getBlobConfig() {
+        return new AzureConfig(getStorageName(), getStorageAccessKey1(), getBlobName());
+    }
+
 }
