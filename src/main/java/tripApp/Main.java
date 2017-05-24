@@ -2,7 +2,9 @@ package tripApp;
 
 import com.microsoft.azure.storage.StorageException;
 import tripApp.config.StaticConfig;
-import tripApp.queue.ResizeQueue;
+import tripApp.queue.QueueRunner;
+import tripApp.worker.IWorker;
+import tripApp.worker.thumbnail.ResizeWorker;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -13,8 +15,8 @@ import java.security.InvalidKeyException;
 public class Main {
     public static void main(String[] args) throws InvalidKeyException, StorageException, URISyntaxException {
 
-        //Thread resizeThread = new Thread(new ResizeQueue())
-        ResizeQueue resizeQueue = new ResizeQueue(StaticConfig.getThumbnailGenQueueAzureConfig() , StaticConfig.getThumbnailBlobAzureConfig());
-        resizeQueue.run();
+        IWorker worker = new ResizeWorker(StaticConfig.getThumbnailBlobAzureConfig());
+        QueueRunner queueRunner = new QueueRunner(StaticConfig.getThumbnailGenQueueAzureConfig() , worker);
+        queueRunner.run();
     }
 }

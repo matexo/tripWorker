@@ -7,7 +7,8 @@ public class StaticConfig {
     //SZPACHLA TODO do przeniesienia do propertiesow // parametrow wywolania
 
     public static final String storageName = "tripappdisks435";
-    public static final String storageKey = "goOmWqmWbUi6OvMMRuOBKeaGjYuBRI4J0UZGj7LUn4VmgiCGvdOuwvKTuJLdXJpAAm3u7SejQTeiaHUnx5ltHg==";
+    public static final String storageKey =  "goOmWqmWbUi6OvMMRuOBKeaGjYuBRI4J0UZGj7LUn4VmgiCGvdOuwvKTuJLdXJpAAm3u7SejQTeiaHUnx5ltHg==";
+    public static final String storageKey2 = "29+Q+cmMfMx9bTr+YNu1p3h9kOWW4sZQBDWMx5/DXshoVhk0SP5tRzghZ91JeHMwEZcgc5Dp7cGgU2Mdk4/wAA==";
     public static final String imageBlobServiceName = "trip-media";
 
     public static final String thumbnailResponseQueueServiceName = "thumbnailresp";

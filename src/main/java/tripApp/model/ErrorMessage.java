@@ -10,4 +10,7 @@ public class ErrorMessage {
     public static final String RESIZING_ERROR = "Resizing error";
     public static final String WRITING_ERROR = "Writing error";
     public static final String UPLOADING_ERROR = "Uploading error";
+
+    public static final String WORKER_NOT_SELECTED = "Worker not selected";
+    public static final String QUEUERUNNER_ERROR = "Error on processing";
 }
