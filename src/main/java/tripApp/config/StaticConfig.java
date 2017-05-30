@@ -16,7 +16,7 @@ public class StaticConfig {
 
     public static final String posterResponseQueueServiceName = "posterresp";
     public static final String posterGenQueueServiceName = "postergen";
-    public static final String posterBlobServiceName = "posters";
+    public static final String posterBlobServiceName = "trip-media";
 
     public static final String presentationResponseQueueServiceName = "presentationresp";
     public static final String presentationGenQueueServiceName = "presentationgen";

@@ -1,21 +1,25 @@
 package tripApp.worker.poster;
 
 import com.microsoft.azure.storage.StorageException;
+import org.imgscalr.Scalr;
 import tripApp.config.AzureConfig;
 import tripApp.exception.WorkerException;
 import tripApp.model.ErrorMessage;
+import tripApp.model.Poster;
 import tripApp.model.ProgressDTO;
 import tripApp.model.Status;
 import tripApp.worker.IWorker;
 import tripApp.worker.Worker;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by martynawisniewska on 23.05.2017.
@@ -23,38 +27,93 @@ import java.security.InvalidKeyException;
 
 public class PosterWorker extends Worker implements IWorker {
 
-    private static final String DEFAULT_FORMAT = "jpg";
+    private static final String DEFAULT_FORMAT = "png";
+    private static final int MAX_MAP_WIDTH = 640; // Google
+    private static final int MAX_MAP_HEIGHT = 640; // Google
+    private static final int THUMBNAIL_SIDE_SIZE = 200;
+    private static final int HORIZONTAL_PHOTO_SIDE = 126;
+    private static final int VERTICAL_PHOTO_SIDE = 155;
 
-    private String correlationID;
+    private Poster posterData;
 
     private int mapWidth;
     private int mapHeight;
 
+    private int photosPerBarInRightSidePhotos;
+    private int photosPerBarInBottomPhotos;
+
     private BufferedImage map;
     private BufferedImage poster;
+    private BufferedImage titleImage;
+    private BufferedImage rightSidePhotos;
+    private BufferedImage bottomPhotos;
     private String posterName;
     private int progress = 0;
     private double progressPerImage = 0;
     private ByteArrayOutputStream blobForPoster;
+    private List<ByteArrayOutputStream> downloadedBlobs = new ArrayList<>();
+    private List<BufferedImage> verticalPhotos = new ArrayList<>();
+    private List<BufferedImage> horizontalPhotos = new ArrayList<>();
 
     public PosterWorker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
         super(azureConfig);
     }
 
-    public String doWork(String message) throws StorageException, WorkerException {
-        parseMessage(message);
-        validateMessage();
-        downloadImages();
-        calculateParams();
-        generateMap();
-        joinImages();
-        addTripNameToPoster();
-        savePoster();
+    public String doWork(String message) throws StorageException {
+        try {
+            parseMessage(message);
+            validateMessage();
+            initFields();
+            setPosterName();
+            setPhotosFromBlobs();
+            calculateParams();
+            generateMap();
+            createTitle();
+            joinImages();
+            savePoster();
+        } catch (WorkerException | URISyntaxException | IOException e) {
+            return null;
+        }
         return "";
     }
 
-    private void addTripNameToPoster() {
-        // dodanie do plakatu informacji o nazwie wycieczki - z JSONa
+    private void setPhotosFromBlobs() throws URISyntaxException, StorageException, IOException {
+        downloadImages();
+        setListsOfPhotos();
+    }
+
+    private void setListsOfPhotos() throws IOException {
+        List<BufferedImage> photos = convertDownloadedImagesToBufferedImages();
+        divideIntoVerticalAndHorizontalPhotos(photos);
+    }
+
+    private void divideIntoVerticalAndHorizontalPhotos(List<BufferedImage> photos){
+        photos.forEach(photo ->{
+            if(photo.getWidth() == THUMBNAIL_SIDE_SIZE){
+                horizontalPhotos.add(photo);
+            } else {
+                verticalPhotos.add(photo);
+            }
+        });
+    }
+
+    private List<BufferedImage> convertDownloadedImagesToBufferedImages() throws IOException {
+        List<BufferedImage> photos = new ArrayList<>();
+        for(ByteArrayOutputStream blob: downloadedBlobs){
+            photos.add(ImageIO.read(new ByteArrayInputStream(blob.toByteArray())));
+        }
+        return photos;
+    }
+
+    private void initFields(){
+        downloadedBlobs = new ArrayList<>();
+        verticalPhotos = new ArrayList<>();
+        horizontalPhotos = new ArrayList<>();
+        blobForPoster = new ByteArrayOutputStream();
+    }
+
+    private void createTitle() {
+        titleImage = TextToGraphicConverter.convertTextToGraphic(posterData.tripName, mapWidth);
     }
 
     private void savePoster() throws StorageException, WorkerException {
@@ -83,7 +142,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void setPosterName() {
-        posterName = ""; // z JSONA
+        posterName = posterData.posterName; // z JSONA
     }
 
     private void sendCalculatingSizesEndedMessage() throws StorageException {
@@ -107,17 +166,108 @@ public class PosterWorker extends Worker implements IWorker {
         logDebugMessage("Message validated");
     }
 
-    private void downloadImages() throws StorageException {
+    private void downloadImages() throws URISyntaxException, StorageException {
         // pobranie miniaturek podanych w JSONie
-        // jeśli bład w pobieraniu throw new WorkerException("Error in downloading images");
-        sendProcessingNextImageEndedMessage(); // po każdym zdjęciu
+        for(String blobName: posterData.blobsNames){
+            downloadedBlobs.add(getBlobImage(blobName));
+            sendProcessingNextImageEndedMessage(); // po każdym zdjęciu
+        }
         logDebugMessage("Images downloaded"); // na końcu
     }
 
+    private ByteArrayOutputStream getBlobImage(String blobName) throws URISyntaxException, StorageException {
+        return container.downloadBlobItem(blobName);
+    }
+
     private void joinImages() throws StorageException {
-        // odpowiednie łączenie zdjęć
-        sendProcessingNextImageEndedMessage(); // po każdym zdjęciu
+        joinVerticalPhotos();
+        joinHorizontalPhotos();
+        joinMapAndRightSidePhotosToPoster();
+        joinBottomPhotosToPoster();
+        joinTitleToPoster();
         logDebugMessage("Images joined"); //na końcu
+    }
+
+    private void joinTitleToPoster() {
+        poster = ImageTools.joinImagesVertically(titleImage, poster);
+    }
+
+    private void joinBottomPhotosToPoster() {
+        poster = ImageTools.joinImagesVertically(poster, bottomPhotos);
+    }
+
+    private void joinMapAndRightSidePhotosToPoster() {
+        poster = ImageTools.joinImagesHorizontally(map, rightSidePhotos);
+    }
+
+    private void joinHorizontalPhotos() throws StorageException {
+        stickBarsVertically(createBottomPhotoBars());
+    }
+
+    private List<BufferedImage> createBottomPhotoBars() throws StorageException {
+        List<BufferedImage> bottomSideBars = new ArrayList<>();
+        BufferedImage barOfPhotos = null;
+        int counter = 1;
+        for(BufferedImage photo: horizontalPhotos){
+            if(counter == photosPerBarInBottomPhotos){
+                bottomSideBars.add(barOfPhotos);
+                barOfPhotos = null;
+            }
+            if(barOfPhotos == null){
+                photo = Scalr.resize(photo, Scalr.Mode.FIT_TO_HEIGHT, THUMBNAIL_SIDE_SIZE, HORIZONTAL_PHOTO_SIDE);
+                barOfPhotos = photo;
+                counter = 1;
+                sendProcessingNextImageEndedMessage();
+            } else {
+                photo = Scalr.resize(photo, Scalr.Mode.FIT_TO_HEIGHT, THUMBNAIL_SIDE_SIZE, HORIZONTAL_PHOTO_SIDE);
+                barOfPhotos = ImageTools.joinImagesHorizontally(barOfPhotos, photo);
+                counter++;
+                sendProcessingNextImageEndedMessage();
+            }
+        }
+        bottomSideBars.add(barOfPhotos);
+        return bottomSideBars;
+    }
+
+    private void stickBarsVertically(List<BufferedImage> bottomSidePhotoBars) {
+        bottomSidePhotoBars.forEach(bar ->{
+            bottomPhotos = ImageTools.joinImagesVertically(bottomPhotos, bar);
+        });
+    }
+
+    private void joinVerticalPhotos() throws StorageException {
+        stickBarsHorizontally(createRightSidePhotoBars());
+    }
+
+    private List<BufferedImage> createRightSidePhotoBars() throws StorageException {
+        List<BufferedImage> rightSideBars = new ArrayList<>();
+        BufferedImage barOfPhotos = null;
+        int counter = 1;
+        for(BufferedImage photo: verticalPhotos){
+            if(counter == photosPerBarInRightSidePhotos){
+                rightSideBars.add(barOfPhotos);
+                barOfPhotos = null;
+            }
+            if(barOfPhotos == null){
+                photo = Scalr.resize(photo, Scalr.Mode.FIT_TO_WIDTH, VERTICAL_PHOTO_SIDE, THUMBNAIL_SIDE_SIZE);
+                barOfPhotos = photo;
+                counter = 1;
+                sendProcessingNextImageEndedMessage();
+            } else {
+                photo = Scalr.resize(photo, Scalr.Mode.FIT_TO_WIDTH, VERTICAL_PHOTO_SIDE, THUMBNAIL_SIDE_SIZE);
+                barOfPhotos = ImageTools.joinImagesVertically(barOfPhotos, photo);
+                counter++;
+                sendProcessingNextImageEndedMessage();
+            }
+        }
+        rightSideBars.add(barOfPhotos);
+        return rightSideBars;
+    }
+
+    private void stickBarsHorizontally(List<BufferedImage> rightSideBars) {
+        rightSideBars.forEach(bar ->{
+            rightSidePhotos = ImageTools.joinImagesHorizontally(rightSidePhotos, bar);
+        });
     }
 
     private void parseMessage(String message) {
@@ -127,73 +277,53 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void calculateParams() throws StorageException {
-        // obliczenie wymiarów
-        // czy miniaturki doklejamy tylko po prawej stronie czy też na dole
-        // ile kolumn/wierszy tworzymy z miniatur
+        calculateMapSize();
         calculateProgressPerImage();
+        calculatePhotosPerBarInRightSidePhotos();
+        calculatePhotosPerBarInBottomPhotos();
         sendCalculatingSizesEndedMessage();
     }
 
+    private void calculatePhotosPerBarInBottomPhotos() {
+        photosPerBarInBottomPhotos = mapWidth / THUMBNAIL_SIDE_SIZE;
+    }
+
+    private void calculatePhotosPerBarInRightSidePhotos() {
+        photosPerBarInRightSidePhotos = mapHeight / THUMBNAIL_SIDE_SIZE;
+    }
+
+    private void calculateMapSize(){
+        int preferredMapSide = THUMBNAIL_SIDE_SIZE * downloadedBlobs.size() > 400 ? THUMBNAIL_SIDE_SIZE * downloadedBlobs.size():400;
+        mapWidth = preferredMapSide < MAX_MAP_WIDTH ? preferredMapSide:MAX_MAP_WIDTH;
+        mapHeight = preferredMapSide < MAX_MAP_HEIGHT ? preferredMapSide:MAX_MAP_HEIGHT;
+    }
+
     private void calculateProgressPerImage() {
-        // progressPerImage = 86.0 / liczba zdjęć + 1
+         progressPerImage = 86.0 / verticalPhotos.size() + horizontalPhotos.size() + 1;
     }
 
     private void generateMap() throws WorkerException {
         MapGenerator mapGenerator = new MapGenerator();
         try {
-            map = mapGenerator.generateMapWithWidthAndHeight(mapWidth ,mapHeight);
+            map = mapGenerator.generateMapWithWidthAndHeight(mapWidth, mapHeight, posterData.coordintes);
         } catch (IOException e) {
             throw new WorkerException("error in generating map");
         }
     }
 
-    public BufferedImage joinImagesHorizontally(BufferedImage img1, BufferedImage img2) {
-        int offset  = 5;
-        int wid = img1.getWidth()+img2.getWidth()+offset;
-        int height = Math.max(img1.getHeight(),img2.getHeight())+offset;
-
-        BufferedImage newImage = new BufferedImage(wid,height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = newImage.createGraphics();
-        Color oldColor = g2.getColor();
-
-        g2.setPaint(Color.WHITE);
-        g2.fillRect(0, 0, wid, height);
-
-        g2.setColor(oldColor);
-        g2.drawImage(img1, null, 0, 0);
-        g2.drawImage(img2, null, img1.getWidth()+offset, 0);
-        g2.dispose();
-        return newImage;
-    }
-
-    public BufferedImage joinImagesVertically(BufferedImage img1,BufferedImage img2) {
-        int offset  = 5;
-        int wid = Math.max(img1.getWidth(), img2.getWidth()) + offset;
-        int height = img1.getHeight() + img2.getHeight() + offset;
-
-        BufferedImage newImage = new BufferedImage(wid,height, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g2 = newImage.createGraphics();
-        Color oldColor = g2.getColor();
-
-        g2.setPaint(Color.WHITE);
-        g2.fillRect(0, 0, wid, height);
-
-        g2.setColor(oldColor);
-        g2.drawImage(img1, null, 0, 0);
-        g2.drawImage(img2, null, 0, img1.getHeight() + offset);
-        g2.dispose();
-        return newImage;
-    }
-
     private void addProgressMessageToQueue(int progress, Status status) throws StorageException {
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(progress, status, correlationID)));
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(progress, status, posterData.correlationID)));
     }
 
-    private void logDebugMessage(String message){
-        logger.debug(message + " :"  + correlationID);
+    private void logDebugMessage(String message) {
+        logger.debug(message + " :" + posterData.correlationID);
     }
 
-    private void logErrorMessage(String errorMessage){
+    private void logErrorMessage(String errorMessage) {
         logger.error(errorMessage);
+    }
+
+    public void setPosterData(Poster posterData){
+        this.posterData = posterData;
     }
 }
