@@ -18,10 +18,10 @@ public class Main {
 
         IWorker worker = new ResizeWorker(StaticConfig.getThumbnailBlobAzureConfig());
         QueueRunner queueRunner = new QueueRunner(StaticConfig.getThumbnailGenQueueAzureConfig() , worker);
-        queueRunner.run();
+        new Thread(queueRunner).start();
 
-        IWorker videoFromImagesWorker = new VideoFromImagesWorker(StaticConfig.getPresentationBlobAzureConfig());
-        QueueRunner queueRunner1 = new QueueRunner(StaticConfig.getPresentationGenQueueAzureConfig(), videoFromImagesWorker);
-        queueRunner1.run();
+        IWorker videoFromImagesWorker = new VideoFromImagesWorker(StaticConfig.getThumbnailBlobAzureConfig());
+        QueueRunner presentationQueueRunner = new QueueRunner(StaticConfig.getPresentationGenQueueAzureConfig(), videoFromImagesWorker);
+        new Thread(presentationQueueRunner).start();
     }
 }
