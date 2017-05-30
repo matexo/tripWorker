@@ -6,33 +6,42 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import org.imgscalr.Scalr;
+import tripApp.model.ProgressDTO;
+import tripApp.model.Status;
 import tripApp.worker.IWorker;
 import tripApp.worker.Worker;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by mr on 5/8/17.
  */
 public class VideoFromImagesWorker extends Worker implements IWorker {
+
     public VideoFromImagesWorker(AzureConfig azureConfig)
             throws InvalidKeyException, StorageException, URISyntaxException {
         super(azureConfig);
     }
 
-    public String doWork(String message) {
-        String[] fileNames = message.split(";");
+    public String doWork(String message) throws StorageException {
+        OurMessage deserializedMessage = parseMessage(message);
+
+        sendWorkStartMessage(deserializedMessage.correlationID);
 
         final Rational framerate = Rational.make(1, 1);
-        final String outputName = fileNames[0].split("\\.")[0];
+        final String outputName = deserializedMessage.tripName + ".avi";
         final Muxer muxer = Muxer.make(outputName, null, "avi");
         final MuxerFormat format = muxer.getFormat();
         final Codec codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
+
+        int progress = 0;
 
         Encoder encoder = Encoder.make(codec);
 
@@ -52,6 +61,9 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
         try {
             muxer.open(null, null);
 
+            progress = 4;
+            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID);
+
             MediaPictureConverter converter = null;
             final MediaPicture picture = MediaPicture.make(
                     encoder.getWidth(),
@@ -60,9 +72,9 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             picture.setTimeBase(framerate);
 
             final MediaPacket packet = MediaPacket.make();
-            for (int i = 0; i < fileNames.length; i++) {
-                ByteArrayOutputStream download = container.downloadBlobItem(fileNames[i]);
-                BufferedImage img = ImageIO.read(new ByteArrayInputStream(download.toByteArray()));
+            for (int i = 0; i < deserializedMessage.filesList.size(); i++) {
+                URL imageURL = new URL(deserializedMessage.filesList.get(i));
+                BufferedImage img = ImageIO.read(imageURL);
                 img = Scalr.resize(img, Scalr.Mode.FIT_EXACT, encoder.getWidth(), encoder.getHeight());
                 img = convertToType(img, BufferedImage.TYPE_3BYTE_BGR);
 
@@ -76,6 +88,8 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                     if (packet.isComplete())
                         muxer.write(packet, false);
                 } while (packet.isComplete());
+                progress += 88 / deserializedMessage.filesList.size();
+                addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID);
             }
 
             do {
@@ -83,13 +97,45 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                 if (packet.isComplete())
                     muxer.write(packet, false);
             } while (packet.isComplete());
+
+            progress += 4;
+            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID);
+
         } catch (Exception e) {
             e.printStackTrace();
+            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
         }
 
         muxer.close();
 
-        // TODO Upload do bloba
+        try {
+            InputStream is = new FileInputStream(outputName);
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+            try {
+                container.uploadBlobItem(outputName, os);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+            }
+            try {
+                is.close();
+                os.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+        }
+
+        addProgressMessageToQueue(progress, Status.COMPLETED, deserializedMessage.correlationID);
+
         return outputName;
     }
 
@@ -103,6 +149,33 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             image.getGraphics().drawImage(sourceImage, 0, 0, null);
         }
         return image;
+    }
+
+    private OurMessage parseMessage(String message) {
+        OurMessage deserializedMessage = gson.fromJson(message, OurMessage.class);
+        logDebugMessage("Message parsed", deserializedMessage.correlationID);
+        return deserializedMessage;
+    }
+
+    private void logDebugMessage(String message, String correlationId) {
+        logger.debug(message + " :" + correlationId);
+    }
+
+    private void sendWorkStartMessage(String correlationID) throws StorageException {
+        addProgressMessageToQueue(0, Status.WORKING, correlationID);
+    }
+
+    private void addProgressMessageToQueue(int progress, Status status, String correlationID) throws StorageException {
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(progress, status, correlationID)));
+    }
+
+    private class OurMessage {
+        private ArrayList<String> filesList;
+        private Date tripEndDate;
+        private String tripDescription;
+        private String tripName;
+        private Date tripStartDate;
+        private String correlationID;
     }
 
 }

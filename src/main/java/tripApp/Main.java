@@ -4,6 +4,7 @@ import com.microsoft.azure.storage.StorageException;
 import tripApp.config.StaticConfig;
 import tripApp.queue.QueueRunner;
 import tripApp.worker.IWorker;
+import tripApp.worker.presentation.VideoFromImagesWorker;
 import tripApp.worker.thumbnail.ResizeWorker;
 
 import java.net.URISyntaxException;
@@ -18,5 +19,9 @@ public class Main {
         IWorker worker = new ResizeWorker(StaticConfig.getThumbnailBlobAzureConfig());
         QueueRunner queueRunner = new QueueRunner(StaticConfig.getThumbnailGenQueueAzureConfig() , worker);
         queueRunner.run();
+
+        IWorker videoFromImagesWorker = new VideoFromImagesWorker(StaticConfig.getPresentationBlobAzureConfig());
+        QueueRunner queueRunner1 = new QueueRunner(StaticConfig.getPresentationGenQueueAzureConfig(), videoFromImagesWorker);
+        queueRunner1.run();
     }
 }

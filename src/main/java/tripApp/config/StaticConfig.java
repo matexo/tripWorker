@@ -18,6 +18,10 @@ public class StaticConfig {
     public static final String posterGenQueueServiceName = "postergen";
     public static final String posterBlobServiceName = "posters";
 
+    public static final String presentationResponseQueueServiceName = "presentationresp";
+    public static final String presentationGenQueueServiceName = "presentationgen";
+    public static final String presentationBlobServiceName = "presentations";
+
     public static AzureConfig getThumbnailResponseAzureConfig() {
         return new AzureConfig(storageName, storageKey,thumbnailResponseQueueServiceName);
     }
@@ -44,6 +48,18 @@ public class StaticConfig {
 
     public static AzureConfig getPosterResponseAzureConfig() {
         return new AzureConfig(storageName, storageKey, posterResponseQueueServiceName);
+    }
+
+    public static AzureConfig getPresentationBlobAzureConfig() {
+        return new AzureConfig(storageName, storageKey, presentationBlobServiceName);
+    }
+
+    public static AzureConfig getPresentationGenQueueAzureConfig() {
+        return new AzureConfig(storageName, storageKey, presentationGenQueueServiceName);
+    }
+
+    public static AzureConfig getPresentationResponseAzureConfig() {
+        return new AzureConfig(storageName, storageKey, presentationResponseQueueServiceName);
     }
 
 }
