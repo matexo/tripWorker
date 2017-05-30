@@ -5,7 +5,7 @@ import org.imgscalr.Scalr;
 import tripApp.config.AzureConfig;
 import tripApp.exception.WorkerException;
 import tripApp.model.ErrorMessage;
-import tripApp.model.Poster;
+import tripApp.model.PosterDTO;
 import tripApp.model.ProgressDTO;
 import tripApp.model.Status;
 import tripApp.worker.IWorker;
@@ -34,7 +34,7 @@ public class PosterWorker extends Worker implements IWorker {
     private static final int HORIZONTAL_PHOTO_SIDE = 126;
     private static final int VERTICAL_PHOTO_SIDE = 155;
 
-    private Poster posterData;
+    private PosterDTO posterData;
 
     private int mapWidth;
     private int mapHeight;
@@ -60,20 +60,21 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     public String doWork(String message) throws StorageException {
-        try {
-            parseMessage(message);
-            validateMessage();
-            initFields();
-            setPosterName();
-            setPhotosFromBlobs();
-            calculateParams();
-            generateMap();
-            createTitle();
-            joinImages();
-            savePoster();
-        } catch (WorkerException | URISyntaxException | IOException e) {
-            return null;
-        }
+        parseMessage(message);
+//        try {
+//            parseMessage(message);
+//            validateMessage();
+//            initFields();
+//            setPosterName();
+//            setPhotosFromBlobs();
+//            calculateParams();
+//            generateMap();
+//            createTitle();
+//            joinImages();
+//            savePoster();
+//        } catch (WorkerException | URISyntaxException | IOException e) {
+//            return null;
+//        }
         return "";
     }
 
@@ -323,7 +324,7 @@ public class PosterWorker extends Worker implements IWorker {
         logger.error(errorMessage);
     }
 
-    public void setPosterData(Poster posterData){
+    public void setPosterData(PosterDTO posterData){
         this.posterData = posterData;
     }
 }

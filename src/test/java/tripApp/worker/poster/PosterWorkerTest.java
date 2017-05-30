@@ -4,7 +4,7 @@ import com.microsoft.azure.storage.StorageException;
 import org.junit.Test;
 import tripApp.config.StaticConfig;
 import tripApp.model.Point;
-import tripApp.model.Poster;
+import tripApp.model.PosterDTO;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
@@ -17,7 +17,7 @@ public class PosterWorkerTest {
 
     @Test
     public void posterGenerationTest() {
-        Poster posterData = new Poster();
+        PosterDTO posterData = new PosterDTO();
         posterData.blobsNames = Arrays.asList("68411628-satellite-wallpapers_1TitgQathumbnail.jpeg",
                 "bartek_wiktor_2_sNRw8Vuthumbnail.jpg",
                 "Caption-This_12thumbnail.jpg",

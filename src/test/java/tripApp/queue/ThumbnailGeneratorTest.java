@@ -24,8 +24,5 @@ public class ThumbnailGeneratorTest {
         IWorker worker = new ResizeWorker(StaticConfig.getThumbnailBlobAzureConfig());
         QueueRunner queueRunner = new QueueRunner(StaticConfig.getThumbnailGenQueueAzureConfig() , worker);
         queueRunner.run();
-
     }
-
-
 }
