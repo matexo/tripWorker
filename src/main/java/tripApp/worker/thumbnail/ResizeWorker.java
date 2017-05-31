@@ -35,12 +35,13 @@ public class ResizeWorker extends Worker implements IWorker {
     private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
 
 
-    public ResizeWorker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
-        super(azureConfig);
+    public ResizeWorker(AzureConfig blobConfig, AzureConfig respConfig)
+            throws InvalidKeyException, StorageException, URISyntaxException {
+        super(blobConfig, respConfig);
     }
 
     //Przyjmuje nazwe pliku do pobrania ewentualnie url w tym przypadku trzeba sparsowac
-    public String doWork(String message) throws StorageException {
+    public String doWork(String message) throws Exception {
 
         ThumbnailDTO thumbnailDTO = gson.fromJson(message, ThumbnailDTO.class);
 

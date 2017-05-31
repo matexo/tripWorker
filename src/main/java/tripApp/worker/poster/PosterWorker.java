@@ -55,8 +55,9 @@ public class PosterWorker extends Worker implements IWorker {
     private List<BufferedImage> verticalPhotos = new ArrayList<>();
     private List<BufferedImage> horizontalPhotos = new ArrayList<>();
 
-    public PosterWorker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
-        super(azureConfig);
+    public PosterWorker(AzureConfig blobConfig, AzureConfig respConfig)
+            throws InvalidKeyException, StorageException, URISyntaxException {
+        super(blobConfig, respConfig);
     }
 
     public String doWork(String message) throws StorageException {
@@ -231,9 +232,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void stickBarsVertically(List<BufferedImage> bottomSidePhotoBars) {
-        bottomSidePhotoBars.forEach(bar ->{
-            bottomPhotos = ImageTools.joinImagesVertically(bottomPhotos, bar);
-        });
+        bottomSidePhotoBars.forEach(bar -> bottomPhotos = ImageTools.joinImagesVertically(bottomPhotos, bar));
     }
 
     private void joinVerticalPhotos() throws StorageException {
@@ -266,9 +265,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void stickBarsHorizontally(List<BufferedImage> rightSideBars) {
-        rightSideBars.forEach(bar ->{
-            rightSidePhotos = ImageTools.joinImagesHorizontally(rightSidePhotos, bar);
-        });
+        rightSideBars.forEach(bar -> rightSidePhotos = ImageTools.joinImagesHorizontally(rightSidePhotos, bar));
     }
 
     private void parseMessage(String message) {

@@ -2,7 +2,7 @@ package tripApp.worker.poster;
 
 import com.microsoft.azure.storage.StorageException;
 import org.junit.Test;
-import tripApp.config.StaticConfig;
+import tripApp.Main;
 import tripApp.model.Point;
 import tripApp.model.PosterDTO;
 
@@ -35,14 +35,10 @@ public class PosterWorkerTest {
         posterData.tripName = "Super wycieczka";
         posterData.posterName = posterData.correlationID + "poster.jpg";
         try {
-            PosterWorker worker = new PosterWorker(StaticConfig.getPosterBlobAzureConfig());
+            PosterWorker worker = new PosterWorker(Main.CONFIG.getBlobConfig(), Main.CONFIG.getPosterRespQueue());
             worker.setPosterData(posterData);
             worker.doWork("aaa");
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (StorageException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
+        } catch (InvalidKeyException | StorageException | URISyntaxException e) {
             e.printStackTrace();
         }
     }

@@ -17,7 +17,7 @@ public class TextToGraphicConverter {
     private static Color TEXT_COLOR = Color.BLACK;
 
     public static void main(String[] args) throws Exception {
-        BufferedImage image = new TextToGraphicConverter().convertTextToGraphic("my text", 300);
+        BufferedImage image = TextToGraphicConverter.convertTextToGraphic("my text", 300);
         //write BufferedImage to file
         ImageIO.write(image, "png", new File("path-to-file2.png"));
     }

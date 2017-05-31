@@ -2,10 +2,10 @@ package tripApp.container;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import tripApp.config.AzureConfig;
-import tripApp.model.ThumbnailDTO;
-import tripApp.model.Status;
+import tripApp.Main;
 import tripApp.model.ProgressDTO;
+import tripApp.model.Status;
+import tripApp.model.ThumbnailDTO;
 import tripApp.worker.IWorker;
 import tripApp.worker.thumbnail.ResizeWorker;
 
@@ -13,10 +13,6 @@ import tripApp.worker.thumbnail.ResizeWorker;
  * Created by Matexo on 2017-05-04.
  */
 public class ContainerTest {
-    public static String accountName = "tripcontainer";
-    public static String accountKey = "beUQum99z5wuiahalcLEesKHwmzNxvP75QNjbSVakxclvqKFuQuNYB0d9SciriyG1RV9Die3wJ+a/lY9KADIhA==";
-    public static String azureServiceName = "img-to-resize";
-
     public static void main(String[] args) throws Exception {
         Gson gson = new GsonBuilder().create();
         ProgressDTO progressDTO = new ProgressDTO(10, Status.WORKING, "123");
@@ -27,8 +23,7 @@ public class ContainerTest {
         json = gson.toJson(thumbnailDTO);
         System.out.println(json);
 
-        AzureConfig containerConfig = new AzureConfig(accountName, accountKey, azureServiceName);
-        IWorker worker = new ResizeWorker(containerConfig);
+        IWorker worker = new ResizeWorker(Main.CONFIG.getBlobConfig(), Main.CONFIG.getThumbnailRespQueue());
         worker.doWork(json);
 
     }

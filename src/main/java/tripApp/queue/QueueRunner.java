@@ -47,7 +47,6 @@ public class QueueRunner implements Runnable {
     public void run() {
         if (worker == null) {
             LOGGER.error(ErrorMessage.WORKER_NOT_SELECTED);
-            return;
         } else {
             LOGGER.info("QueueRunner started");
             while (isRunning) {

@@ -45,8 +45,9 @@ public class VideoWorker extends Worker implements IWorker {
     private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
 
 
-    public VideoWorker(AzureConfig azureConfig) throws InvalidKeyException, StorageException, URISyntaxException {
-        super(azureConfig);
+    public VideoWorker(AzureConfig blobConfig, AzureConfig respConfig)
+            throws InvalidKeyException, StorageException, URISyntaxException {
+        super(blobConfig, respConfig);
     }
 
     public String doWork(String message) throws StorageException {
@@ -171,18 +172,14 @@ public class VideoWorker extends Worker implements IWorker {
         return thumbnailDTO.getFileName() != null && thumbnailDTO.getFileFormat() != null;
     }
 
-    private void saveFileFromBAOS(ByteArrayOutputStream baos, String fileName) throws IOException {
-        FileOutputStream fos = null;
-        try {
-            fos = new FileOutputStream (new File(fileName));
+    private static  void saveFileFromBAOS(ByteArrayOutputStream baos, String fileName) {
+        try (FileOutputStream fos = new FileOutputStream(new File(fileName))) {
             baos.writeTo(fos);
-        } catch(IOException ioe) {
+        } catch (IOException ioe) {
             ioe.printStackTrace();
-        } finally {
-            fos.close();
         }
     }
-    private void deleteFileFromDisk(String filePath){
+    private static void deleteFileFromDisk(String filePath){
         try{
             File file = new File(filePath);
             file.delete();
@@ -191,12 +188,12 @@ public class VideoWorker extends Worker implements IWorker {
         }
     }
 
-    private void makeThumbnailFromVideo(String filePath) throws FileNotFoundException {
+    private void makeThumbnailFromVideo(String filePath) {
         IMediaReader mediaReader = ToolFactory.makeReader(filePath);
         mediaReader.setBufferedImageTypeToGenerate(BufferedImage.TYPE_3BYTE_BGR);
         mediaReader.addListener(new ImageSnapListener());
 
-        while (mediaReader.readPacket() == null && END_PROCESSING != true) ;
+        while (mediaReader.readPacket() == null && !END_PROCESSING) ;
         mediaReader.close();
     }
 

@@ -1,7 +1,7 @@
 package tripApp.worker;
 
 import com.google.gson.Gson;
-import tripApp.config.AzureConfig;
+import tripApp.Main;
 import tripApp.worker.presentation.VideoFromImagesWorker;
 
 import java.util.ArrayList;
@@ -19,7 +19,8 @@ public class VideoFromImagesWorkerTest {
     public static OurMessage message = new OurMessage();
 
     public static void main(String[] args) throws Exception {
-        VideoFromImagesWorker worker = new VideoFromImagesWorker(new AzureConfig(accountName, accountKey, azureServiceName));
+        VideoFromImagesWorker worker
+                = new VideoFromImagesWorker(Main.CONFIG.getBlobConfig(), Main.CONFIG.getPresentationRespQueue());
         Gson gson = new Gson();
         String json = gson.toJson(message);
         String json2 = "{\"filesList\": [\"https://tripappdisks435.blob.core.windows.net/trip-media/bartek_wiktor_4B2ExIX.jpg\", \"https://tripappdisks435.blob.core.windows.net/trip-media/GH1rWAL_-_Imgur.jpg\", \"https://tripappdisks435.blob.core.windows.net/trip-media/rzesz.jpg\", \"https://tripappdisks435.blob.core.windows.net/trip-media/Caption-This_10.jpg\"], \"tripEndDate\": \"2017-05-09\", \"tripDescription\": \"rodzinny wyjazd\", \"tripName\": \"Narty w Alpach 2000\", \"tripStartDate\": \"2017-05-04\", \"correlationID\": \"dd9ba1f2-1f83-435d-9fee-404db7aec2c0\"}";

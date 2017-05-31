@@ -2,7 +2,11 @@ package tripApp.config;
 
 import org.apache.log4j.Logger;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
 /**
@@ -14,20 +18,20 @@ public class WorkersConfig {
             STORAGE_ACCESS_KEY_1 = "storage.access.key1",
             STORAGE_ACCESS_KEY_2 = "storage.access.key2",
 
-            BLOB_NAME = "storage.blobs.container.name",
+    BLOB_NAME = "storage.blobs.container.name",
             BLOB_URL = "storage.blobs.container.url",
 
-            THUMBNAILS_GEN_QUEUE_NAME = "storage.queues.thumbnails.requests.name",
+    THUMBNAILS_GEN_QUEUE_NAME = "storage.queues.thumbnails.requests.name",
             THUMBNAILS_GEN_QUEUE_URL = "storage.queues.thumbnails.requests.url",
             THUMBNAILS_RESP_QUEUE_NAME = "storage.queues.thumbnails.responses.name",
             THUMBNAILS_RESP_QUEUE_URL = "storage.queues.thumbnails.responses.url",
 
-            PRESENTATIONS_GEN_QUEUE_NAME = "storage.queues.presentations.requests.name",
+    PRESENTATIONS_GEN_QUEUE_NAME = "storage.queues.presentations.requests.name",
             PRESENTATIONS_GEN_QUEUE_URL = "storage.queues.presentations.requests.url",
             PRESENTATIONS_RESP_QUEUE_NAME = "storage.queues.presentations.responses.name",
             PRESENTATIONS_RESP_QUEUE_URL = "storage.queues.presentations.responses.url",
 
-            POSTERS_GEN_QUEUE_NAME = "storage.queues.posters.requests.name",
+    POSTERS_GEN_QUEUE_NAME = "storage.queues.posters.requests.name",
             POSTERS_GEN_QUEUE_URL = "storage.queues.posters.requests.url",
             POSTERS_RESP_QUEUE_NAME = "storage.queues.posters.responses.name",
             POSTERS_RESP_QUEUE_URL = "storage.queues.posters.responses.url";
@@ -39,30 +43,70 @@ public class WorkersConfig {
     public WorkersConfig() {
         properties = new Properties();
         try {
-            properties.load(getClass().getResourceAsStream("workers.properties"));
+            URI uri = getClass().getResource("/workers.properties").toURI();
+            FileInputStream fileStream = new FileInputStream(new File(uri));
+            properties.load(fileStream);
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
     }
 
-    public String getProperty(String key) {
+    private String getProperty(String key) {
         return properties.getProperty(key);
     }
 
-    public String getStorageName() {
+    private String getStorageName() {
         return getProperty(STORAGE_NAME);
     }
 
-    public String getStorageAccessKey1() {
+    private String getStorageAccessKey1() {
         return getProperty(STORAGE_ACCESS_KEY_1);
     }
 
-    public String getBlobName() {
+    private String getBlobName() {
         return getProperty(BLOB_NAME);
     }
 
     public AzureConfig getBlobConfig() {
         return new AzureConfig(getStorageName(), getStorageAccessKey1(), getBlobName());
+    }
+
+    public AzureConfig getThumbnailGenQueue() {
+        return new AzureConfig(
+                getStorageName(), getStorageAccessKey1(), getProperty(THUMBNAILS_GEN_QUEUE_NAME)
+        );
+    }
+
+    public AzureConfig getThumbnailRespQueue() {
+        return new AzureConfig(
+                getStorageName(), getStorageAccessKey1(), getProperty(THUMBNAILS_RESP_QUEUE_NAME)
+        );
+    }
+
+    public AzureConfig getPresentationGenQueue() {
+        return new AzureConfig(
+                getStorageName(), getStorageAccessKey1(), getProperty(PRESENTATIONS_GEN_QUEUE_NAME)
+        );
+    }
+
+    public AzureConfig getPresentationRespQueue() {
+        return new AzureConfig(
+                getStorageName(), getStorageAccessKey1(), getProperty(PRESENTATIONS_RESP_QUEUE_NAME)
+        );
+    }
+
+    public AzureConfig getPosterGenQueue() {
+        return new AzureConfig(
+                getStorageName(), getStorageAccessKey1(), getProperty(POSTERS_GEN_QUEUE_NAME)
+        );
+    }
+
+    public AzureConfig getPosterRespQueue() {
+        return new AzureConfig(
+                getStorageName(), getStorageAccessKey1(), getProperty(POSTERS_RESP_QUEUE_NAME)
+        );
     }
 
 }

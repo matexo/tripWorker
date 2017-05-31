@@ -19,15 +19,16 @@ import java.net.URL;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by mr on 5/8/17.
  */
 public class VideoFromImagesWorker extends Worker implements IWorker {
 
-    public VideoFromImagesWorker(AzureConfig azureConfig)
+    public VideoFromImagesWorker(AzureConfig blobConfig, AzureConfig respConfig)
             throws InvalidKeyException, StorageException, URISyntaxException {
-        super(azureConfig);
+        super(blobConfig, respConfig);
     }
 
     public String doWork(String message) throws StorageException {
@@ -170,7 +171,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
     }
 
     private class OurMessage {
-        private ArrayList<String> filesList;
+        private List<String> filesList;
         private Date tripEndDate;
         private String tripDescription;
         private String tripName;
