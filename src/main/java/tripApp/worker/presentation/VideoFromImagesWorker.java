@@ -135,7 +135,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
         }
 
-        addProgressMessageToQueue(progress, Status.COMPLETED, deserializedMessage.correlationID);
+        addProgressMessageToQueue(100, Status.COMPLETED, deserializedMessage.correlationID);
 
         return outputName;
     }
