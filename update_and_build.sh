@@ -6,5 +6,5 @@ echo "Pulling changes..."
 git pull
 
 echo "Building JAR with dependencies..."
-mvn clean package
+mvn clean package -Dmaven.test.skip=true
 
