@@ -65,7 +65,6 @@ public class PosterWorker extends Worker implements IWorker {
 
     public String doWork(String message) throws StorageException {
         try {
-            addProgressMessageToQueue(0,Status.WORKING);
             parseMessage(message);
             addProgressMessageToQueue(5,Status.WORKING);
             validateMessage();
