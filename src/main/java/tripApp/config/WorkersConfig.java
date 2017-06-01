@@ -43,13 +43,9 @@ public class WorkersConfig {
     public WorkersConfig() {
         properties = new Properties();
         try {
-            URI uri = getClass().getResource("/workers.properties").toURI();
-            FileInputStream fileStream = new FileInputStream(new File(uri));
-            properties.load(fileStream);
+            properties.load(getClass().getResourceAsStream("/workers.properties"));
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
     }
 
