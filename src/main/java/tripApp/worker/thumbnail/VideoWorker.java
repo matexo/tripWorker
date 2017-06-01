@@ -40,7 +40,7 @@ public class VideoWorker extends Worker implements IWorker {
     public static final long MICRO_SECONDS_BETWEEN_FRAMES =
             (long) (Global.DEFAULT_PTS_PER_SECOND * SECONDS_BETWEEN_FRAMES);
 
-    private final List<String> acceptableFormat = Arrays.asList("mp4", "avi", "flv");
+    public static final List<String> acceptableFormat = Arrays.asList("mp4", "avi", "flv");
 
     private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
 

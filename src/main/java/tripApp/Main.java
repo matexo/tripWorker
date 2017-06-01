@@ -7,6 +7,8 @@ import tripApp.worker.IWorker;
 import tripApp.worker.presentation.VideoFromImagesWorker;
 import tripApp.worker.thumbnail.ResizeWorker;
 import tripApp.worker.poster.*;
+import tripApp.worker.thumbnail.ThumbnailSwitcher;
+import tripApp.worker.thumbnail.VideoWorker;
 
 /**
  * Created by piotr on 17.05.17.
@@ -17,8 +19,10 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            IWorker worker = new ResizeWorker(CONFIG.getBlobConfig(), CONFIG.getThumbnailRespQueue());
-            QueueRunner queueRunner = new QueueRunner(CONFIG.getThumbnailGenQueue(), worker);
+            IWorker resizeWorker = new ResizeWorker(CONFIG.getBlobConfig(), CONFIG.getThumbnailRespQueue());
+            IWorker videoWorker = new VideoWorker(CONFIG.getBlobConfig() , CONFIG.getThumbnailRespQueue());
+            IWorker thumbnailSwitcher = new ThumbnailSwitcher(resizeWorker , videoWorker);
+            QueueRunner queueRunner = new QueueRunner(CONFIG.getThumbnailGenQueue(), thumbnailSwitcher);
             Thread thumbThread = new Thread(queueRunner);
 	    thumbThread.start();
 

@@ -29,7 +29,7 @@ public class ResizeWorker extends Worker implements IWorker {
     private static final String DEFAULT_FORMAT = "jpg";
     private static final String ADDITIONAL_FILE_NAME = "thumbnail.";
 
-    private final List<String> acceptableFormat = Arrays.asList("jpg", "png" , "jpeg"); // z kropka czy bez?
+    public static final List<String> acceptableFormat = Arrays.asList("jpg", "png" , "jpeg"); // z kropka czy bez?
 
     //bardzo brzydka szpachla
     private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
