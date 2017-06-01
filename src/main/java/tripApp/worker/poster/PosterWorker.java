@@ -2,6 +2,7 @@ package tripApp.worker.poster;
 
 import com.microsoft.azure.storage.StorageException;
 import org.imgscalr.Scalr;
+import tripApp.Main;
 import tripApp.config.AzureConfig;
 import tripApp.exception.WorkerException;
 import tripApp.model.ErrorMessage;
@@ -20,6 +21,8 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static tripApp.config.WorkersConfig.BLOB_URL;
 
 /**
  * Created by martynawisniewska on 23.05.2017.
@@ -62,16 +65,30 @@ public class PosterWorker extends Worker implements IWorker {
 
     public String doWork(String message) throws StorageException {
         try {
+            addProgressMessageToQueue(0,Status.WORKING);
             parseMessage(message);
+            addProgressMessageToQueue(5,Status.WORKING);
             validateMessage();
+            addProgressMessageToQueue(10,Status.WORKING);
             initFields();
+            addProgressMessageToQueue(15,Status.WORKING);
             setPosterName();
+            addProgressMessageToQueue(25,Status.WORKING);
             setPhotosFromBlobs();
+            addProgressMessageToQueue(50,Status.WORKING);
             calculateParams();
+            addProgressMessageToQueue(55,Status.WORKING);
             generateMap();
+            addProgressMessageToQueue(70,Status.WORKING);
             createTitle();
+            addProgressMessageToQueue(75,Status.WORKING);
             joinImages();
+            addProgressMessageToQueue(90,Status.WORKING);
             savePoster();
+            ProgressDTO progressDTO = new ProgressDTO(100,Status.COMPLETED , posterData.correlationID);
+            progressDTO.setContent(Main.CONFIG.getProperty(BLOB_URL) + posterName);
+            progressQueue.addMessageToQueue(gson.toJson(progressDTO));
+
         } catch (WorkerException | URISyntaxException | IOException e) {
             return null;
         }
