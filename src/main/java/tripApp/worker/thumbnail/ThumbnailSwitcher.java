@@ -29,7 +29,7 @@ public class ThumbnailSwitcher implements IWorker {
         if (fileFormat != null) {
             if (ResizeWorker.acceptableFormat.contains(fileFormat)) {
                 output = resizeWorker.doWork(message);
-            } else if (VideoWorker.acceptableFormat.contains(videoWorker)) {
+            } else if (VideoWorker.acceptableFormat.contains(fileFormat)) {
                 output = videoWorker.doWork(message);
             }
         }
