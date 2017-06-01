@@ -98,7 +98,7 @@ public class ResizeWorker extends Worker implements IWorker {
         String thumbnailName = thumbnailDTO.getFileName() + ADDITIONAL_FILE_NAME + thumbnailDTO.getFileFormat();
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ImageIO.write(bufferedImage, DEFAULT_FORMAT, byteArrayOutputStream);
+            ImageIO.write(bufferedImage, thumbnailDTO.getFileFormat().toUpperCase(), byteArrayOutputStream);
         } catch (IOException e) {
             progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(80, Status.ERROR, thumbnailDTO.getCorrelationID())));
             logger.error(ErrorMessage.WRITING_ERROR);
@@ -142,6 +142,8 @@ public class ResizeWorker extends Worker implements IWorker {
         if (validateFormat(fileFormat)) {
             thumbnailDTO.setFileName(fileName);
             thumbnailDTO.setFileFormat(fileFormat);
+        } else {
+            logger.error("Wrong format of image");
         }
         return thumbnailDTO;
     }
