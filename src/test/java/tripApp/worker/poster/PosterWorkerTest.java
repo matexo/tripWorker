@@ -24,7 +24,7 @@ public class PosterWorkerTest {
                 "GH1rWAL_-_Imgur_NviiCl2thumbnail.jpg",
                 "received_1148491218515534thumbnail.jpeg",
                 "68411628-satellite-wallpapers_smilWEVthumbnail.jpeg");
-        posterData.coordintes = Arrays.asList(new Point(52.2355063,21.0001000),
+        posterData.coordinates = Arrays.asList(new Point(52.2355063,21.0001000),
                     new Point(52.2399063,21.0001000),
                     new Point(52.2309063,21.0000000),
                     new Point(52.2300063,21.0020000),

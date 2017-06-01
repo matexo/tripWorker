@@ -62,20 +62,20 @@ public class PosterWorker extends Worker implements IWorker {
 
     public String doWork(String message) throws StorageException {
         parseMessage(message);
-//        try {
-//            parseMessage(message);
-//            validateMessage();
-//            initFields();
-//            setPosterName();
-//            setPhotosFromBlobs();
-//            calculateParams();
-//            generateMap();
-//            createTitle();
-//            joinImages();
-//            savePoster();
-//        } catch (WorkerException | URISyntaxException | IOException e) {
-//            return null;
-//        }
+        try {
+            parseMessage(message);
+            validateMessage();
+            initFields();
+            setPosterName();
+            setPhotosFromBlobs();
+            calculateParams();
+            generateMap();
+            createTitle();
+            joinImages();
+            savePoster();
+        } catch (WorkerException | URISyntaxException | IOException e) {
+            return null;
+        }
         return "";
     }
 
@@ -304,7 +304,7 @@ public class PosterWorker extends Worker implements IWorker {
     private void generateMap() throws WorkerException {
         MapGenerator mapGenerator = new MapGenerator();
         try {
-            map = mapGenerator.generateMapWithWidthAndHeight(mapWidth, mapHeight, posterData.coordintes);
+            map = mapGenerator.generateMapWithWidthAndHeight(mapWidth, mapHeight, posterData.coordinates);
         } catch (IOException e) {
             throw new WorkerException("error in generating map");
         }
