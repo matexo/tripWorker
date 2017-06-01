@@ -1,6 +1,7 @@
 package tripApp.worker.presentation;
 
 import com.microsoft.azure.storage.StorageException;
+import tripApp.Main;
 import tripApp.config.AzureConfig;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
@@ -20,6 +21,8 @@ import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static tripApp.config.WorkersConfig.BLOB_URL;
 
 /**
  * Created by mr on 5/8/17.
@@ -63,7 +66,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             muxer.open(null, null);
 
             progress = 4;
-            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID);
+            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID, "");
 
             MediaPictureConverter converter = null;
             final MediaPicture picture = MediaPicture.make(
@@ -90,7 +93,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                         muxer.write(packet, false);
                 } while (packet.isComplete());
                 progress += 88 / deserializedMessage.filesList.size();
-                addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID);
+                addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID, "");
             }
 
             do {
@@ -100,11 +103,11 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             } while (packet.isComplete());
 
             progress += 4;
-            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID);
+            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID, "");
 
         } catch (Exception e) {
             e.printStackTrace();
-            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
         }
 
         muxer.close();
@@ -121,21 +124,21 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                 container.uploadBlobItem(outputName, os);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
             }
             try {
                 is.close();
                 os.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID);
+            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
         }
 
-        addProgressMessageToQueue(100, Status.COMPLETED, deserializedMessage.correlationID);
+        addProgressMessageToQueue(100, Status.COMPLETED, deserializedMessage.correlationID, outputName);
 
         return outputName;
     }
@@ -163,11 +166,13 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
     }
 
     private void sendWorkStartMessage(String correlationID) throws StorageException {
-        addProgressMessageToQueue(0, Status.WORKING, correlationID);
+        addProgressMessageToQueue(0, Status.WORKING, correlationID, "");
     }
 
-    private void addProgressMessageToQueue(int progress, Status status, String correlationID) throws StorageException {
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(progress, status, correlationID)));
+    private void addProgressMessageToQueue(int progress, Status status, String correlationID, String name) throws StorageException {
+        ProgressDTO msg = new ProgressDTO(progress, status, correlationID);
+        msg.setContent(Main.CONFIG.getProperty(BLOB_URL) + name);
+        progressQueue.addMessageToQueue(gson.toJson(msg));
     }
 
     private class OurMessage {

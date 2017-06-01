@@ -49,7 +49,7 @@ public class WorkersConfig {
         }
     }
 
-    private String getProperty(String key) {
+    public String getProperty(String key) {
         return properties.getProperty(key);
     }
 
