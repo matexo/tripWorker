@@ -61,7 +61,6 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     public String doWork(String message) throws StorageException {
-        parseMessage(message);
         try {
             parseMessage(message);
             validateMessage();
@@ -144,7 +143,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void setPosterName() {
-        posterName = posterData.posterName; // z JSONA
+        posterName = posterData.tripName + ".jpg"; // z JSONA
     }
 
     private void sendCalculatingSizesEndedMessage() throws StorageException {

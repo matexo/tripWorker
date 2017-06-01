@@ -61,12 +61,16 @@ public class WorkersConfig {
         return getProperty(STORAGE_ACCESS_KEY_1);
     }
 
+    private String getStorageAccessKey2() {
+        return getProperty(STORAGE_ACCESS_KEY_2);
+    }
+
     private String getBlobName() {
         return getProperty(BLOB_NAME);
     }
 
     public AzureConfig getBlobConfig() {
-        return new AzureConfig(getStorageName(), getStorageAccessKey1(), getBlobName());
+        return new AzureConfig(getStorageName(), getStorageAccessKey2(), getBlobName());
     }
 
     public AzureConfig getThumbnailGenQueue() {

@@ -1,7 +1,12 @@
 package tripApp;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.apache.log4j.Logger;
+import tripApp.config.AzureConfig;
 import tripApp.config.WorkersConfig;
+import tripApp.model.ThumbnailDTO;
+import tripApp.queue.Queue;
 import tripApp.queue.QueueRunner;
 import tripApp.worker.IWorker;
 import tripApp.worker.presentation.VideoFromImagesWorker;
@@ -19,6 +24,16 @@ public class Main {
 
     public static void main(String[] args) {
         try {
+//            Gson gson = new GsonBuilder().create();
+//            AzureConfig azureConfig = new AzureConfig(CONFIG.getThumbnailGenQueue());
+//            Queue generatorQueue = new Queue(CONFIG.getPosterGenQueue());
+//        for(Integer i=1; i<10 ;i++) {
+//            ThumbnailDTO message = new ThumbnailDTO("1", "https://tripappdisks435.blob.core.windows.net/trip-media/Item%20name2.avi");
+//            String json = gson.toJson(message);
+//            String msg =""
+//            generatorQueue.addMessageToQueue(json);
+//        }1
+
             IWorker resizeWorker = new ResizeWorker(CONFIG.getBlobConfig(), CONFIG.getThumbnailRespQueue());
             IWorker videoWorker = new VideoWorker(CONFIG.getBlobConfig() , CONFIG.getThumbnailRespQueue());
             IWorker thumbnailSwitcher = new ThumbnailSwitcher(resizeWorker , videoWorker);
@@ -31,7 +46,7 @@ public class Main {
             QueueRunner presentationQueueRunner
                     = new QueueRunner(CONFIG.getPresentationGenQueue(), videoFromImagesWorker);
             Thread presThread = new Thread(presentationQueueRunner);
-	    presThread.start();
+            presThread.start();
 
 	    IWorker posterWorker = new PosterWorker(CONFIG.getBlobConfig(), CONFIG.getPosterRespQueue());
 	    QueueRunner posterRunner = new QueueRunner(CONFIG.getPosterGenQueue(), posterWorker);
