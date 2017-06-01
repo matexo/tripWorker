@@ -271,6 +271,7 @@ public class PosterWorker extends Worker implements IWorker {
     private void parseMessage(String message) {
         // przetworzenie JSONa i dodanie odpowiednich pól
         // jeśli bład w przetwarzaniu throw new WorkerException("Error in parsing message");
+        posterData = gson.fromJson(message, PosterDTO.class);
         logDebugMessage("Message parsed");
     }
 
