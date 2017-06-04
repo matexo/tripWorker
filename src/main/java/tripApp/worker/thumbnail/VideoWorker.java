@@ -2,7 +2,9 @@ package tripApp.worker.thumbnail;
 
 import com.microsoft.azure.storage.StorageException;
 import org.imgscalr.Scalr;
+import tripApp.Main;
 import tripApp.config.AzureConfig;
+import tripApp.config.WorkersConfig;
 import tripApp.model.ErrorMessage;
 import tripApp.model.ProgressDTO;
 import tripApp.model.Status;
@@ -32,17 +34,15 @@ public class VideoWorker extends Worker implements IWorker {
     private static final String DEFAULT_FORMAT = "jpg";
     private static final String ADDITIONAL_FILE_NAME = "thumbnail.";
 
-    public static final double SECONDS_BETWEEN_FRAMES = 2;
+    private static final double SECONDS_BETWEEN_FRAMES = 2;
     private static int mVideoStreamIndex = -1;
     private static boolean END_PROCESSING = false;
     private static BufferedImage videoImage;
     private static long mLastPtsWrite = Global.NO_PTS;
-    public static final long MICRO_SECONDS_BETWEEN_FRAMES =
+    static final long MICRO_SECONDS_BETWEEN_FRAMES =
             (long) (Global.DEFAULT_PTS_PER_SECOND * SECONDS_BETWEEN_FRAMES);
 
-    public static final List<String> acceptableFormat = Arrays.asList("mp4", "avi", "flv");
-
-    private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
+    static final List<String> acceptableFormat = Arrays.asList("mp4", "avi", "flv");
 
 
     public VideoWorker(AzureConfig blobConfig, AzureConfig respConfig)
@@ -138,7 +138,7 @@ public class VideoWorker extends Worker implements IWorker {
         }
 
         ProgressDTO progressDTO = new ProgressDTO(100, Status.COMPLETED, thumbnailDTO.getCorrelationID());
-        progressDTO.setContent(HARDCODED_BASE_URL + thumbnailName);
+        progressDTO.setContent(Main.CONFIG.getProperty(WorkersConfig.BLOB_URL) + thumbnailName);
         progressQueue.addMessageToQueue(gson.toJson(progressDTO));
         logger.debug("Processed " + thumbnailDTO.getCorrelationID());
 

@@ -2,7 +2,9 @@ package tripApp.worker.thumbnail;
 
 import com.microsoft.azure.storage.StorageException;
 import org.imgscalr.Scalr;
+import tripApp.Main;
 import tripApp.config.AzureConfig;
+import tripApp.config.WorkersConfig;
 import tripApp.model.ErrorMessage;
 import tripApp.model.ThumbnailDTO;
 import tripApp.model.Status;
@@ -29,11 +31,7 @@ public class ResizeWorker extends Worker implements IWorker {
     private static final String DEFAULT_FORMAT = "jpg";
     private static final String ADDITIONAL_FILE_NAME = "thumbnail.";
 
-    public static final List<String> acceptableFormat = Arrays.asList("jpg", "png" , "jpeg"); // z kropka czy bez?
-
-    //bardzo brzydka szpachla
-    private final String HARDCODED_BASE_URL = "https://tripappdisks435.blob.core.windows.net/trip-media/";
-
+    static final List<String> acceptableFormat = Arrays.asList("jpg", "png" , "jpeg"); // z kropka czy bez?
 
     public ResizeWorker(AzureConfig blobConfig, AzureConfig respConfig)
             throws InvalidKeyException, StorageException, URISyntaxException {
@@ -117,7 +115,7 @@ public class ResizeWorker extends Worker implements IWorker {
         }
 
         ProgressDTO progressDTO = new ProgressDTO(100, Status.COMPLETED, thumbnailDTO.getCorrelationID());
-        progressDTO.setContent(HARDCODED_BASE_URL + thumbnailName);
+        progressDTO.setContent(Main.CONFIG.getProperty(WorkersConfig.BLOB_URL) + thumbnailName);
         progressQueue.addMessageToQueue(gson.toJson(progressDTO));
         logger.debug("Processed " + thumbnailDTO.getCorrelationID());
 

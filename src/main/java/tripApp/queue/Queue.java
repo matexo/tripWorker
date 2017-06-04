@@ -15,14 +15,12 @@ import java.security.InvalidKeyException;
  */
 public class Queue {
 
-    private CloudStorageAccount cloudStorageAccount;
-    private CloudQueueClient cloudQueueClient;
     private CloudQueue cloudQueue;
     private Integer timeToProcessMessage = 60;
 
     public Queue(AzureConfig queueConfig) throws URISyntaxException, InvalidKeyException, StorageException {
-        cloudStorageAccount = CloudStorageAccount.parse(queueConfig.getConfig());
-        cloudQueueClient = cloudStorageAccount.createCloudQueueClient();
+        CloudStorageAccount cloudStorageAccount = CloudStorageAccount.parse(queueConfig.getConfig());
+        CloudQueueClient cloudQueueClient = cloudStorageAccount.createCloudQueueClient();
         cloudQueue = cloudQueueClient.getQueueReference(queueConfig.getAzureServiceName());
         cloudQueue.setShouldEncodeMessage(false);
     }

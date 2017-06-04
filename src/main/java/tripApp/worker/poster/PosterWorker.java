@@ -177,8 +177,6 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void validateMessage() throws StorageException {
-        // walidacja
-        // jeśli zła throw new WorkerException("Message not valid");
         sendWorkStartMessage();
         logDebugMessage("Message validated");
     }
@@ -187,9 +185,9 @@ public class PosterWorker extends Worker implements IWorker {
         // pobranie miniaturek podanych w JSONie
         for(String blobName: posterData.blobsNames){
             downloadedBlobs.add(getBlobImage(blobName));
-            sendProcessingNextImageEndedMessage(); // po każdym zdjęciu
+            sendProcessingNextImageEndedMessage();
         }
-        logDebugMessage("Images downloaded"); // na końcu
+        logDebugMessage("Images downloaded");
     }
 
     private ByteArrayOutputStream getBlobImage(String blobName) throws URISyntaxException, StorageException {
@@ -202,7 +200,7 @@ public class PosterWorker extends Worker implements IWorker {
         joinMapAndRightSidePhotosToPoster();
         joinBottomPhotosToPoster();
         joinTitleToPoster();
-        logDebugMessage("Images joined"); //na końcu
+        logDebugMessage("Images joined");
     }
 
     private void joinTitleToPoster() {
@@ -284,8 +282,6 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void parseMessage(String message) {
-        // przetworzenie JSONa i dodanie odpowiednich pól
-        // jeśli bład w przetwarzaniu throw new WorkerException("Error in parsing message");
         posterData = gson.fromJson(message, PosterDTO.class);
         logDebugMessage("Message parsed");
     }

@@ -6,7 +6,6 @@ package tripApp.model;
 public class ProgressDTO {
     private Integer progress;
     private Status status;
-    //long czy int
     private String correlationID;
     private String progressInfo;
     private String content;

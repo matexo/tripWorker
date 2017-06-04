@@ -18,13 +18,11 @@ import java.security.InvalidKeyException;
  */
 public class Container {
 
-    private CloudStorageAccount cloudStorageAccount;
-    private CloudBlobClient cloudBlobClient;
     private CloudBlobContainer cloudBlobContainer;
 
     public Container(AzureConfig containerConfig) throws URISyntaxException, InvalidKeyException, StorageException {
-        cloudStorageAccount = CloudStorageAccount.parse(containerConfig.getConfig());
-        cloudBlobClient = cloudStorageAccount.createCloudBlobClient();
+        CloudStorageAccount cloudStorageAccount = CloudStorageAccount.parse(containerConfig.getConfig());
+        CloudBlobClient cloudBlobClient = cloudStorageAccount.createCloudBlobClient();
         cloudBlobContainer = cloudBlobClient.getContainerReference(containerConfig.getAzureServiceName());
     }
 

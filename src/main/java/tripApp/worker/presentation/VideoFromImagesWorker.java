@@ -18,7 +18,6 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.InvalidKeyException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -176,6 +175,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
     }
 
     private class OurMessage {
+        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         private List<String> filesList;
         private Date tripEndDate;
         private String tripDescription;

@@ -6,9 +6,9 @@ import java.awt.image.BufferedImage;
 /**
  * Created by martynawisniewska on 30.05.2017.
  */
-public class ImageTools {
+class ImageTools {
 
-    public static BufferedImage joinImagesHorizontally(BufferedImage img1, BufferedImage img2) {
+    static BufferedImage joinImagesHorizontally(BufferedImage img1, BufferedImage img2) {
         img1 = initBufferedImage(img1);
         img2 = initBufferedImage(img2);
         int offset = 5;
@@ -29,7 +29,7 @@ public class ImageTools {
         return newImage;
     }
 
-    public static BufferedImage joinImagesVertically(BufferedImage img1, BufferedImage img2) {
+    static BufferedImage joinImagesVertically(BufferedImage img1, BufferedImage img2) {
         img1 = initBufferedImage(img1);
         img2 = initBufferedImage(img2);
         int offset = 5;
