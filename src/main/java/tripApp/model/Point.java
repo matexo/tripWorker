@@ -5,10 +5,10 @@ package tripApp.model;
  */
 public class Point {
     public double latitude;
-    public double longitude;
+    public double longtitude;
 
-    public Point(double latitude, double longitude) {
+    public Point(double latitude, double longtitude) {
         this.latitude = latitude;
-        this.longitude = longitude;
+        this.longtitude = longtitude;
     }
 }

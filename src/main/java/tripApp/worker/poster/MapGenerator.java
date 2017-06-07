@@ -51,7 +51,7 @@ class MapGenerator{
     private void setUrlString(){
         setSize();
         setSensor();
-        setMarkers();
+        //setMarkers();
         setPath();
     }
 
@@ -65,7 +65,7 @@ class MapGenerator{
 
     private void setMarkers(){
         coordinates.forEach(point ->
-                urlString += getMarkerStringFromCoordinatesWithLabel(point.latitude, point.longitude, '*'));
+                urlString += getMarkerStringFromCoordinatesWithLabel(point.latitude, point.longtitude, '*'));
     }
 
     private String getMarkerStringFromCoordinatesWithLabel(double latitude, double longitude, char label) {
@@ -78,7 +78,7 @@ class MapGenerator{
     }
 
     private void addPathCoordinates(){
-        coordinates.forEach(point -> urlString += "|" + point.latitude + "," + point.longitude);
+        coordinates.forEach(point -> urlString += "|" + point.latitude + "," + point.longtitude);
     }
 
     public String getUrlString(){

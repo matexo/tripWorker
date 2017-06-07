@@ -9,7 +9,7 @@ import java.util.List;
 public class PosterDTO {
     public List<Point> coordinates = new ArrayList<>();
     public String tripName;
-    public List<String> blobsNames = new ArrayList<>();
+    public List<String> filesList;
     public String posterName;
     public String correlationID;
 }

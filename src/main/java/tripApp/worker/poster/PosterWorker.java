@@ -51,6 +51,7 @@ public class PosterWorker extends Worker implements IWorker {
     private BufferedImage rightSidePhotos;
     private BufferedImage bottomPhotos;
     private String posterName;
+    private List<String> blobsNames = new ArrayList<>();
     private int progress = 0;
     private double progressPerImage = 0;
     private ByteArrayOutputStream blobForPoster;
@@ -65,38 +66,43 @@ public class PosterWorker extends Worker implements IWorker {
 
     public String doWork(String message) throws StorageException {
         try {
+            sendWorkStartMessage();
             parseMessage(message);
-            addProgressMessageToQueue(5,Status.WORKING);
             validateMessage();
-            addProgressMessageToQueue(10,Status.WORKING);
             initFields();
-            addProgressMessageToQueue(15,Status.WORKING);
             setPosterName();
-            addProgressMessageToQueue(25,Status.WORKING);
+            calculateProgressPerImage();
             setPhotosFromBlobs();
-            addProgressMessageToQueue(50,Status.WORKING);
             calculateParams();
-            addProgressMessageToQueue(55,Status.WORKING);
             generateMap();
-            addProgressMessageToQueue(70,Status.WORKING);
             createTitle();
-            addProgressMessageToQueue(75,Status.WORKING);
             joinImages();
-            addProgressMessageToQueue(90,Status.WORKING);
             savePoster();
-            ProgressDTO progressDTO = new ProgressDTO(100,Status.COMPLETED , posterData.correlationID);
-            progressDTO.setContent(Main.CONFIG.getProperty(BLOB_URL) + posterName);
-            progressQueue.addMessageToQueue(gson.toJson(progressDTO));
-
+            sendWorkDoneMessage();
         } catch (WorkerException | URISyntaxException | IOException e) {
             return null;
         }
         return "";
     }
 
+    private void sendWorkDoneMessage() throws StorageException {
+        ProgressDTO progressDTO = new ProgressDTO(100,Status.COMPLETED , posterData.correlationID);
+        progressDTO.setContent(Main.CONFIG.getProperty(BLOB_URL) + posterName);
+        progressQueue.addMessageToQueue(gson.toJson(progressDTO));
+    }
+
     private void setPhotosFromBlobs() throws URISyntaxException, StorageException, IOException {
+        extractBlobNamesFromUrlList();
         downloadImages();
         setListsOfPhotos();
+    }
+
+    private void extractBlobNamesFromUrlList() {
+        posterData.filesList.forEach( url -> {
+            int blobNameStart = url.lastIndexOf("/") + 1;
+            blobsNames.add(url.substring(blobNameStart));
+                }
+        );
     }
 
     private void setListsOfPhotos() throws IOException {
@@ -106,7 +112,7 @@ public class PosterWorker extends Worker implements IWorker {
 
     private void divideIntoVerticalAndHorizontalPhotos(List<BufferedImage> photos){
         photos.forEach(photo ->{
-            if(photo.getWidth() == THUMBNAIL_SIDE_SIZE){
+            if(photo.getWidth() >= photo.getHeight()){
                 horizontalPhotos.add(photo);
             } else {
                 verticalPhotos.add(photo);
@@ -123,6 +129,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void initFields(){
+        blobsNames = new ArrayList<>();
         downloadedBlobs = new ArrayList<>();
         verticalPhotos = new ArrayList<>();
         horizontalPhotos = new ArrayList<>();
@@ -177,13 +184,12 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void validateMessage() throws StorageException {
-        sendWorkStartMessage();
+        // tutaj powinna być walidacja
         logDebugMessage("Message validated");
     }
 
     private void downloadImages() throws URISyntaxException, StorageException {
-        // pobranie miniaturek podanych w JSONie
-        for(String blobName: posterData.blobsNames){
+        for(String blobName: blobsNames){
             downloadedBlobs.add(getBlobImage(blobName));
             sendProcessingNextImageEndedMessage();
         }
@@ -288,7 +294,6 @@ public class PosterWorker extends Worker implements IWorker {
 
     private void calculateParams() throws StorageException {
         calculateMapSize();
-        calculateProgressPerImage();
         calculatePhotosPerBarInRightSidePhotos();
         calculatePhotosPerBarInBottomPhotos();
         sendCalculatingSizesEndedMessage();
@@ -309,7 +314,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void calculateProgressPerImage() {
-         progressPerImage = 86.0 / verticalPhotos.size() + horizontalPhotos.size() + 1;
+         progressPerImage = (86.0 / posterData.filesList.size() + 1) / 2;
     }
 
     private void generateMap() throws WorkerException {
