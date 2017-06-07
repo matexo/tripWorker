@@ -66,8 +66,8 @@ public class PosterWorker extends Worker implements IWorker {
 
     public String doWork(String message) throws StorageException {
         try {
-            sendWorkStartMessage();
             parseMessage(message);
+            sendWorkStartMessage();
             validateMessage();
             initFields();
             setPosterName();
