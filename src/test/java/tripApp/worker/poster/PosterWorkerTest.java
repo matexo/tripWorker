@@ -18,7 +18,7 @@ public class PosterWorkerTest {
     @Test
     public void posterGenerationTest() {
         PosterDTO posterData = new PosterDTO();
-        posterData.blobsNames = Arrays.asList("https://tripappdisks435.blob.core.windows.net/trip-media/68411628-satellite-wallpapers_1TitgQathumbnail.jpeg",
+        posterData.filesList = Arrays.asList("https://tripappdisks435.blob.core.windows.net/trip-media/68411628-satellite-wallpapers_1TitgQathumbnail.jpeg",
                 "https://tripappdisks435.blob.core.windows.net/trip-media/bartek_wiktor_2_sNRw8Vuthumbnail.jpg",
                 "https://tripappdisks435.blob.core.windows.net/trip-media/Caption-This_12thumbnail.jpg",
                 "https://tripappdisks435.blob.core.windows.net/trip-media/GH1rWAL_-_Imgur_NviiCl2thumbnail.jpg",
