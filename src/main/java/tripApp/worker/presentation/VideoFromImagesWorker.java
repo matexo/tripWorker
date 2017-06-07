@@ -1,6 +1,7 @@
 package tripApp.worker.presentation;
 
 import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.core.Logger;
 import tripApp.Main;
 import tripApp.config.AzureConfig;
 import io.humble.video.*;
@@ -28,13 +29,16 @@ import static tripApp.config.WorkersConfig.BLOB_URL;
  */
 public class VideoFromImagesWorker extends Worker implements IWorker {
 
+
     public VideoFromImagesWorker(AzureConfig blobConfig, AzureConfig respConfig)
             throws InvalidKeyException, StorageException, URISyntaxException {
         super(blobConfig, respConfig);
     }
 
     public String doWork(String message) throws StorageException {
+        logger.info("Downloaded message:" +  message);
         OurMessage deserializedMessage = parseMessage(message);
+        logger.info("Parsed message:" +  deserializedMessage.toString());
 
         sendWorkStartMessage(deserializedMessage.correlationID);
 
@@ -175,7 +179,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
     }
 
     private class OurMessage {
-        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
+//        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         private List<String> filesList;
         private String tripName;
         private String correlationID;
