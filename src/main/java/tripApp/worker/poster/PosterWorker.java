@@ -181,7 +181,7 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void sendProcessingNextImageEndedMessage() throws StorageException {
-        progress += progressPerImage;
+        progress = progress < 88.0 ? progress += progressPerImage: progress;
         addProgressMessageToQueue(progress, Status.WORKING);
     }
 
