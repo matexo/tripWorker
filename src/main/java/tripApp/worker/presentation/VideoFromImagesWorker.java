@@ -1,7 +1,6 @@
 package tripApp.worker.presentation;
 
 import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.core.Logger;
 import tripApp.Main;
 import tripApp.config.AzureConfig;
 import io.humble.video.*;
@@ -10,6 +9,7 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import org.imgscalr.Scalr;
 import tripApp.model.ProgressDTO;
 import tripApp.model.Status;
+import tripApp.model.VideoFromImagesDTO;
 import tripApp.worker.IWorker;
 import tripApp.worker.Worker;
 
@@ -19,7 +19,6 @@ import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.InvalidKeyException;
-import java.util.Date;
 import java.util.List;
 
 import static tripApp.config.WorkersConfig.BLOB_URL;
@@ -36,14 +35,12 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
     }
 
     public String doWork(String message) throws StorageException {
-        logger.info("Downloaded message:" +  message);
-        OurMessage deserializedMessage = parseMessage(message);
-        logger.info("Parsed message:" +  deserializedMessage.toString());
+        VideoFromImagesDTO deserializedMessage = parseMessage(message);
 
-        sendWorkStartMessage(deserializedMessage.correlationID);
+        sendWorkStartMessage(deserializedMessage.getCorrelationID());
 
         final Rational framerate = Rational.make(1, 1);
-        final String outputName = deserializedMessage.tripName + ".avi";
+        final String outputName = deserializedMessage.getTripName() + ".avi";
         final Muxer muxer = Muxer.make(outputName, null, "avi");
         final MuxerFormat format = muxer.getFormat();
         final Codec codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
@@ -69,7 +66,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             muxer.open(null, null);
 
             progress = 4;
-            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID, "");
+            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.getCorrelationID(), "");
 
             MediaPictureConverter converter = null;
             final MediaPicture picture = MediaPicture.make(
@@ -79,8 +76,8 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             picture.setTimeBase(framerate);
 
             final MediaPacket packet = MediaPacket.make();
-            for (int i = 0; i < deserializedMessage.filesList.size(); i++) {
-                URL imageURL = new URL(deserializedMessage.filesList.get(i));
+            for (int i = 0; i < deserializedMessage.getFilesList().size(); i++) {
+                URL imageURL = new URL(deserializedMessage.getFilesList().get(i));
                 BufferedImage img = ImageIO.read(imageURL);
                 img = Scalr.resize(img, Scalr.Mode.FIT_EXACT, encoder.getWidth(), encoder.getHeight());
                 img = convertToType(img, BufferedImage.TYPE_3BYTE_BGR);
@@ -95,8 +92,8 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                     if (packet.isComplete())
                         muxer.write(packet, false);
                 } while (packet.isComplete());
-                progress += 88 / deserializedMessage.filesList.size();
-                addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID, "");
+                progress += 88 / deserializedMessage.getFilesList().size();
+                addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.getCorrelationID(), "");
             }
 
             do {
@@ -106,11 +103,11 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
             } while (packet.isComplete());
 
             progress += 4;
-            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.correlationID, "");
+            addProgressMessageToQueue(progress, Status.WORKING, deserializedMessage.getCorrelationID(), "");
 
         } catch (Exception e) {
             e.printStackTrace();
-            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
+            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.getCorrelationID(), "");
         }
 
         muxer.close();
@@ -127,21 +124,21 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
                 container.uploadBlobItem(outputName, os);
             } catch (Exception ex) {
                 ex.printStackTrace();
-                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
+                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.getCorrelationID(), "");
             }
             try {
                 is.close();
                 os.close();
             } catch (Exception ex) {
                 ex.printStackTrace();
-                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
+                addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.getCorrelationID(), "");
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.correlationID, "");
+            addProgressMessageToQueue(progress, Status.ERROR, deserializedMessage.getCorrelationID(), "");
         }
 
-        addProgressMessageToQueue(100, Status.COMPLETED, deserializedMessage.correlationID, outputName);
+        addProgressMessageToQueue(100, Status.COMPLETED, deserializedMessage.getCorrelationID(), outputName);
 
         return outputName;
     }
@@ -158,9 +155,9 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
         return image;
     }
 
-    private OurMessage parseMessage(String message) {
-        OurMessage deserializedMessage = gson.fromJson(message, OurMessage.class);
-        logDebugMessage("Message parsed", deserializedMessage.correlationID);
+    private VideoFromImagesDTO parseMessage(String message) {
+        VideoFromImagesDTO deserializedMessage = gson.fromJson(message, VideoFromImagesDTO.class);
+        logDebugMessage("Message parsed", deserializedMessage.getCorrelationID());
         return deserializedMessage;
     }
 
@@ -178,11 +175,11 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
         progressQueue.addMessageToQueue(gson.toJson(msg));
     }
 
-    private class OurMessage {
-//        @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
-        private List<String> filesList;
-        private String tripName;
-        private String correlationID;
-    }
+
+
+
+
+
+
 
 }
