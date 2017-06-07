@@ -33,19 +33,19 @@ public class Main {
             IWorker videoWorker = new VideoWorker(CONFIG.getBlobConfig(), CONFIG.getThumbnailRespQueue());
             IWorker thumbnailSwitcher = new ThumbnailSwitcher(resizeWorker, videoWorker);
             QueueRunner queueRunner = new QueueRunner(CONFIG.getThumbnailGenQueue(), thumbnailSwitcher);
-            Thread thumbThread = new Thread(queueRunner);
+            Thread thumbThread = new Thread(queueRunner, "thumbnailThread");
             thumbThread.start();
 
             IWorker videoFromImagesWorker
                     = new VideoFromImagesWorker(CONFIG.getBlobConfig(), CONFIG.getPresentationRespQueue());
             QueueRunner presentationQueueRunner
                     = new QueueRunner(CONFIG.getPresentationGenQueue(), videoFromImagesWorker);
-            Thread presThread = new Thread(presentationQueueRunner);
+            Thread presThread = new Thread(presentationQueueRunner, "presentationThread");
             presThread.start();
 
             IWorker posterWorker = new PosterWorker(CONFIG.getBlobConfig(), CONFIG.getPosterRespQueue());
             QueueRunner posterRunner = new QueueRunner(CONFIG.getPosterGenQueue(), posterWorker);
-            Thread posterThread = new Thread(posterRunner);
+            Thread posterThread = new Thread(posterRunner, "posterThread");
             posterThread.start();
 
             thumbThread.join();
