@@ -177,10 +177,7 @@ public class VideoFromImagesWorker extends Worker implements IWorker {
     private class OurMessage {
         @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
         private List<String> filesList;
-        private Date tripEndDate;
-        private String tripDescription;
         private String tripName;
-        private Date tripStartDate;
         private String correlationID;
     }
 
