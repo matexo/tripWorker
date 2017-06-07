@@ -52,7 +52,7 @@ public class PosterWorker extends Worker implements IWorker {
     private BufferedImage bottomPhotos;
     private String posterName;
     private List<String> blobsNames = new ArrayList<>();
-    private int progress = 0;
+    private double progress = 0.0;
     private double progressPerImage = 0;
     private ByteArrayOutputStream blobForPoster;
     private List<ByteArrayOutputStream> downloadedBlobs = new ArrayList<>();
@@ -143,6 +143,12 @@ public class PosterWorker extends Worker implements IWorker {
     private void savePoster() throws StorageException, WorkerException {
         setBlobFromPoster();
         uploadBlobForPoster();
+        sendPosterSavedMessage();
+    }
+
+    private void sendPosterSavedMessage() throws StorageException {
+        progress += 10;
+        addProgressMessageToQueue(progress, Status.WORKING);
     }
 
     private void uploadBlobForPoster() throws StorageException, WorkerException {
@@ -314,20 +320,26 @@ public class PosterWorker extends Worker implements IWorker {
     }
 
     private void calculateProgressPerImage() {
-         progressPerImage = (86.0 / posterData.filesList.size() + 1) / 2;
+         progressPerImage = 75.0 / (2 * posterData.filesList.size() - 1);
     }
 
-    private void generateMap() throws WorkerException {
+    private void generateMap() throws WorkerException, StorageException {
         MapGenerator mapGenerator = new MapGenerator();
         try {
             map = mapGenerator.generateMapWithWidthAndHeight(mapWidth, mapHeight, posterData.coordinates);
+            sendMapGeneratedMessage();
         } catch (IOException e) {
             throw new WorkerException("error in generating map");
         }
     }
 
-    private void addProgressMessageToQueue(int progress, Status status) throws StorageException {
-        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO(progress, status, posterData.correlationID)));
+    private void sendMapGeneratedMessage() throws StorageException {
+        progress += 5;
+        addProgressMessageToQueue(progress, Status.WORKING);
+    }
+
+    private void addProgressMessageToQueue(double progress, Status status) throws StorageException {
+        progressQueue.addMessageToQueue(gson.toJson(new ProgressDTO((int)Math.round(progress), status, posterData.correlationID)));
     }
 
     private void logDebugMessage(String message) {
