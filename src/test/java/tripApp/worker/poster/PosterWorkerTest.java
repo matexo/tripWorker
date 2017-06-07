@@ -18,6 +18,12 @@ public class PosterWorkerTest {
     @Test
     public void posterGenerationTest() {
         PosterDTO posterData = new PosterDTO();
+        posterData.filesList = Arrays.asList("https://tripappdisks435.blob.core.windows.net/trip-media/68411628-satellite-wallpapers_1TitgQathumbnail.jpeg",
+                "https://tripappdisks435.blob.core.windows.net/trip-media/bartek_wiktor_2_sNRw8Vuthumbnail.jpg",
+                "https://tripappdisks435.blob.core.windows.net/trip-media/Caption-This_12thumbnail.jpg",
+                "https://tripappdisks435.blob.core.windows.net/trip-media/GH1rWAL_-_Imgur_NviiCl2thumbnail.jpg",
+                "https://tripappdisks435.blob.core.windows.net/trip-media/received_1148491218515534thumbnail.jpeg",
+                "https://tripappdisks435.blob.core.windows.net/trip-media/68411628-satellite-wallpapers_smilWEVthumbnail.jpeg");
         posterData.coordinates = Arrays.asList(new Point(52.2355063,21.0001000),
                     new Point(52.2399063,21.0001000),
                     new Point(52.2309063,21.0000000),
